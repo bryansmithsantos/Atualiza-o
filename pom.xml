@@ -6,7 +6,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>blinded-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Blinded</name>
 
     <properties>
@@ -32,6 +32,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -35,6 +35,6 @@ logs:
   max: 30
 update:
   repo: "bryansmithsantos/Atualiza-o"
-  asset: "Blinded.jar"
+  branch: "main"
+  jar-path: "dist/Blinded.jar"
   save-as: "Blinded.jar"
-  direct-url: ""

@@ -26,10 +26,10 @@ import com.example.economia.features.missions.MissionsService;
 import com.example.economia.features.scoreboard.ScoreboardService;
 import com.example.economia.features.shop.ShopService;
 import com.example.economia.features.tax.TaxService;
-import com.example.economia.features.upgrades.UpgradesService;
-import com.example.economia.features.vault.VaultService;
 import com.example.economia.features.update.UpdateCommand;
 import com.example.economia.features.update.UpdateService;
+import com.example.economia.features.upgrades.UpgradesService;
+import com.example.economia.features.vault.VaultService;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
