@@ -1,9 +1,12 @@
 package com.example.economia.features.update;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 
 public final class UpdateCommand implements CommandExecutor {
 
@@ -16,7 +19,7 @@ public final class UpdateCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("blinded.admin")) {
-            sender.sendMessage(ChatColor.RED + "Sem permissão.");
+            sender.sendMessage(Component.text("Sem permissão.").color(NamedTextColor.RED));
             return true;
         }
 
@@ -24,56 +27,65 @@ public final class UpdateCommand implements CommandExecutor {
 
         switch (sub) {
             case "check" -> {
-                sender.sendMessage(ChatColor.YELLOW + "Verificando atualizações...");
+                sender.sendMessage(Component.text("Verificando atualizações...").color(NamedTextColor.YELLOW));
                 UpdateInfo info = updateService.checkForUpdate();
                 if (info == null) {
-                    sender.sendMessage(ChatColor.GREEN + "✓ Plugin está atualizado!");
+                    sender.sendMessage(Component.text("✓ Plugin está atualizado!").color(NamedTextColor.GREEN));
                     String lastCommit = updateService.getLastKnownCommit();
                     if (lastCommit != null && !lastCommit.isEmpty()) {
-                        sender.sendMessage(ChatColor.GRAY + "Último commit: "
-                                + lastCommit.substring(0, Math.min(7, lastCommit.length())));
+                        sender.sendMessage(Component
+                                .text("Último commit: " + lastCommit.substring(0, Math.min(7, lastCommit.length())))
+                                .color(NamedTextColor.GRAY));
                     }
                     return true;
                 }
-                sender.sendMessage("");
-                sender.sendMessage(ChatColor.AQUA + "═══ Nova Atualização Disponível ═══");
-                sender.sendMessage(ChatColor.WHITE + "Commit: " + ChatColor.YELLOW + info.version());
+                sender.sendMessage(Component.empty());
+                sender.sendMessage(Component.text("═══ Nova Atualização Disponível ═══").color(NamedTextColor.AQUA)
+                        .decorate(TextDecoration.BOLD));
+                sender.sendMessage(Component.text("Commit: ").color(NamedTextColor.WHITE)
+                        .append(Component.text(info.version()).color(NamedTextColor.YELLOW)));
                 if (info.getCommitMessage() != null) {
-                    sender.sendMessage(ChatColor.WHITE + "Mensagem: " + ChatColor.GRAY + info.getCommitMessage());
+                    sender.sendMessage(Component.text("Mensagem: ").color(NamedTextColor.WHITE)
+                            .append(Component.text(info.getCommitMessage()).color(NamedTextColor.GRAY)));
                 }
                 if (info.getCommitDate() != null) {
-                    sender.sendMessage(ChatColor.WHITE + "Data: " + ChatColor.GRAY + info.getCommitDate());
+                    sender.sendMessage(Component.text("Data: ").color(NamedTextColor.WHITE)
+                            .append(Component.text(info.getCommitDate()).color(NamedTextColor.GRAY)));
                 }
-                sender.sendMessage("");
-                sender.sendMessage(ChatColor.GREEN + "Use /blinded download para atualizar!");
-                sender.sendMessage(ChatColor.AQUA + "═══════════════════════════════════");
+                sender.sendMessage(Component.empty());
+                sender.sendMessage(Component.text("Use /blinded download para atualizar!").color(NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("═══════════════════════════════════").color(NamedTextColor.AQUA));
                 return true;
             }
 
             case "download", "update" -> {
-                sender.sendMessage(ChatColor.YELLOW + "Verificando atualizações...");
+                sender.sendMessage(Component.text("Verificando atualizações...").color(NamedTextColor.YELLOW));
                 UpdateInfo info = updateService.checkForUpdate();
                 if (info == null) {
-                    sender.sendMessage(ChatColor.GREEN + "✓ Plugin já está na versão mais recente!");
+                    sender.sendMessage(
+                            Component.text("✓ Plugin já está na versão mais recente!").color(NamedTextColor.GREEN));
                     return true;
                 }
 
-                sender.sendMessage(ChatColor.YELLOW + "Baixando atualização: " + info.version());
+                sender.sendMessage(
+                        Component.text("Baixando atualização: " + info.version()).color(NamedTextColor.YELLOW));
 
                 if (!updateService.download(info)) {
-                    sender.sendMessage(ChatColor.RED + "✗ Falha ao baixar atualização.");
-                    sender.sendMessage(ChatColor.RED + "Verifique se o JAR existe em dist/ no repositório.");
+                    sender.sendMessage(Component.text("✗ Falha ao baixar atualização.").color(NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Verifique se o JAR existe em dist/ no repositório.")
+                            .color(NamedTextColor.RED));
                     return true;
                 }
 
-                sender.sendMessage(ChatColor.GREEN + "✓ Update baixado com sucesso!");
-                sender.sendMessage(ChatColor.YELLOW + "Reiniciando servidor para aplicar...");
+                sender.sendMessage(Component.text("✓ Update baixado com sucesso!").color(NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("Reiniciando servidor para aplicar...").color(NamedTextColor.YELLOW));
                 updateService.shutdownServer();
                 return true;
             }
 
             case "force" -> {
-                sender.sendMessage(ChatColor.YELLOW + "Forçando download da última versão...");
+                sender.sendMessage(
+                        Component.text("Forçando download da última versão...").color(NamedTextColor.YELLOW));
 
                 // Criar info manualmente para forçar download
                 String repo = "bryansmithsantos/Atualiza-o";
@@ -81,26 +93,28 @@ public final class UpdateCommand implements CommandExecutor {
                 UpdateInfo info = new UpdateInfo("force", downloadUrl);
 
                 if (!updateService.download(info)) {
-                    sender.sendMessage(ChatColor.RED + "✗ Falha ao baixar.");
+                    sender.sendMessage(Component.text("✗ Falha ao baixar.").color(NamedTextColor.RED));
                     return true;
                 }
 
-                sender.sendMessage(ChatColor.GREEN + "✓ Download forçado concluído!");
-                sender.sendMessage(ChatColor.YELLOW + "Reiniciando servidor...");
+                sender.sendMessage(Component.text("✓ Download forçado concluído!").color(NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("Reiniciando servidor...").color(NamedTextColor.YELLOW));
                 updateService.shutdownServer();
                 return true;
             }
 
             default -> {
-                sender.sendMessage("");
-                sender.sendMessage(ChatColor.AQUA + "═══ Blinded - Sistema de Atualização ═══");
+                sender.sendMessage(Component.empty());
+                sender.sendMessage(Component.text("═══ Blinded - Sistema de Atualização ═══").color(NamedTextColor.AQUA)
+                        .decorate(TextDecoration.BOLD));
+                sender.sendMessage(Component.text("/blinded check ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("- Verifica se há atualizações").color(NamedTextColor.WHITE)));
+                sender.sendMessage(Component.text("/blinded download ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("- Baixa e aplica atualização").color(NamedTextColor.WHITE)));
+                sender.sendMessage(Component.text("/blinded force ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("- Força download (ignora cache)").color(NamedTextColor.WHITE)));
                 sender.sendMessage(
-                        ChatColor.YELLOW + "/blinded check " + ChatColor.WHITE + "- Verifica se há atualizações");
-                sender.sendMessage(
-                        ChatColor.YELLOW + "/blinded download " + ChatColor.WHITE + "- Baixa e aplica atualização");
-                sender.sendMessage(
-                        ChatColor.YELLOW + "/blinded force " + ChatColor.WHITE + "- Força download (ignora cache)");
-                sender.sendMessage(ChatColor.AQUA + "════════════════════════════════════════");
+                        Component.text("════════════════════════════════════════").color(NamedTextColor.AQUA));
                 return true;
             }
         }
