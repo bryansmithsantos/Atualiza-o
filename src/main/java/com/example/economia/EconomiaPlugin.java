@@ -83,7 +83,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         taxService = new TaxService(this);
         updateService = new UpdateService(this);
 
-        workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService, companyService, logService);
+        workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService,
+                companyService, logService);
         shopService = new ShopService(this);
         shopService.load();
 
@@ -92,10 +93,15 @@ public final class EconomiaPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(scoreboardService.getPlayerListener(), this);
         getServer().getPluginManager().registerEvents(new EconomyListener(economyService), this);
         getServer().getPluginManager().registerEvents(new AuthListener(authService), this);
-        getServer().getPluginManager().registerEvents(new AuthInputListener(authService, economyService, jobsService, workService), this);
-        getServer().getPluginManager().registerEvents(new GuiListener(authService, economyService, jobsService, workService, shopService,
-                bankService, vaultService, upgradesService, missionsService, licenseService, marketService, companyService, finesService,
-                logService, taxService), this);
+        getServer().getPluginManager()
+                .registerEvents(new AuthInputListener(authService, economyService, jobsService, workService), this);
+        getServer().getPluginManager()
+                .registerEvents(new GuiListener(authService, economyService, jobsService, workService, shopService,
+                        bankService, vaultService, upgradesService, missionsService, licenseService, marketService,
+                        companyService, finesService,
+                        logService, taxService), this);
+        getServer().getPluginManager().registerEvents(new com.example.economia.features.treefeller.TreeFellerListener(),
+                this);
         if (getCommand("money") != null) {
             MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
             getCommand("money").setExecutor(moneyCommand);
@@ -111,7 +117,8 @@ public final class EconomiaPlugin extends JavaPlugin {
             getCommand("register").setExecutor(new AuthCommand(authService, true));
         }
         if (getCommand("loja") != null) {
-            getCommand("loja").setExecutor(new ShopCommand(authService, shopService, economyService.getCurrencySymbol()));
+            getCommand("loja")
+                    .setExecutor(new ShopCommand(authService, shopService, economyService.getCurrencySymbol()));
         }
         if (getCommand("multa") != null) {
             getCommand("multa").setExecutor(new FinesCommand(finesService, logService));

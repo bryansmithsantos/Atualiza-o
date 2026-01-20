@@ -33,3 +33,6 @@ permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.
     default: op
+  blinded.treefeller:
+    description: Permite cortar arvore inteira (agachado + machado).
+    default: true

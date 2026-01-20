@@ -51,8 +51,10 @@ public final class GuiListener implements Listener {
     private final LogService logService;
     private final TaxService taxService;
 
-    public GuiListener(AuthService authService, EconomyService economyService, JobsService jobsService, WorkService workService,
-            ShopService shopService, BankService bankService, VaultService vaultService, UpgradesService upgradesService,
+    public GuiListener(AuthService authService, EconomyService economyService, JobsService jobsService,
+            WorkService workService,
+            ShopService shopService, BankService bankService, VaultService vaultService,
+            UpgradesService upgradesService,
             MissionsService missionsService, LicenseService licenseService, MarketService marketService,
             CompanyService companyService, FinesService finesService, LogService logService, TaxService taxService) {
         this.authService = authService;
@@ -79,13 +81,13 @@ public final class GuiListener implements Listener {
         }
         String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
         if (!title.equals(GuiTitles.AUTH_TEXT) && !title.equals(GuiTitles.MAIN_TEXT)
-            && !title.equals(GuiTitles.JOBS_TEXT) && !title.equals(GuiTitles.WORK_TEXT)
-            && !title.equals(GuiTitles.SHOP_TEXT) && !title.equals(GuiTitles.BANK_TEXT)
-            && !title.equals(GuiTitles.VAULT_TEXT) && !title.equals(GuiTitles.UPGRADES_TEXT)
-            && !title.equals(GuiTitles.MISSIONS_TEXT) && !title.equals(GuiTitles.MARKET_TEXT)
-            && !title.equals(GuiTitles.MARKET_PRICE_TEXT) && !title.equals(GuiTitles.COMPANY_TEXT)
-            && !title.equals(GuiTitles.COMPANY_INVITE_TEXT) && !title.equals(GuiTitles.FINES_TEXT)
-            && !title.equals(GuiTitles.LEADERBOARDS_TEXT) && !title.equals(GuiTitles.LOGS_TEXT)) {
+                && !title.equals(GuiTitles.JOBS_TEXT) && !title.equals(GuiTitles.WORK_TEXT)
+                && !title.equals(GuiTitles.SHOP_TEXT) && !title.equals(GuiTitles.BANK_TEXT)
+                && !title.equals(GuiTitles.VAULT_TEXT) && !title.equals(GuiTitles.UPGRADES_TEXT)
+                && !title.equals(GuiTitles.MISSIONS_TEXT) && !title.equals(GuiTitles.MARKET_TEXT)
+                && !title.equals(GuiTitles.MARKET_PRICE_TEXT) && !title.equals(GuiTitles.COMPANY_TEXT)
+                && !title.equals(GuiTitles.COMPANY_INVITE_TEXT) && !title.equals(GuiTitles.FINES_TEXT)
+                && !title.equals(GuiTitles.LEADERBOARDS_TEXT) && !title.equals(GuiTitles.LOGS_TEXT)) {
             return;
         }
         event.setCancelled(true);
@@ -233,10 +235,43 @@ public final class GuiListener implements Listener {
         if (type == Material.GOLD_INGOT) {
             WorkResult result = workService.tryWork(player);
             if (!result.success()) {
-                player.sendMessage("Aguarde " + result.remainingSeconds() + "s para trabalhar novamente.");
+                // Título de cooldown
+                net.kyori.adventure.title.Title cooldownTitle = net.kyori.adventure.title.Title.title(
+                        net.kyori.adventure.text.Component.text("⏳ Aguarde!")
+                                .color(net.kyori.adventure.text.format.NamedTextColor.RED),
+                        net.kyori.adventure.text.Component.text(result.remainingSeconds() + " segundos restantes")
+                                .color(net.kyori.adventure.text.format.NamedTextColor.YELLOW),
+                        net.kyori.adventure.title.Title.Times.times(
+                                java.time.Duration.ofMillis(200),
+                                java.time.Duration.ofSeconds(2),
+                                java.time.Duration.ofMillis(500)));
+                player.showTitle(cooldownTitle);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 return;
             }
-            player.sendMessage("Você recebeu " + workService.getCurrencySymbol() + String.format("%.2f", result.reward()) + ".");
+
+            // Título de sucesso
+            String rewardStr = workService.getCurrencySymbol() + String.format("%.2f", result.reward());
+            net.kyori.adventure.title.Title successTitle = net.kyori.adventure.title.Title.title(
+                    net.kyori.adventure.text.Component.text("💰 Trabalho Concluído!")
+                            .color(net.kyori.adventure.text.format.NamedTextColor.GREEN),
+                    net.kyori.adventure.text.Component.text("+" + rewardStr)
+                            .color(net.kyori.adventure.text.format.NamedTextColor.GOLD),
+                    net.kyori.adventure.title.Title.Times.times(
+                            java.time.Duration.ofMillis(200),
+                            java.time.Duration.ofSeconds(2),
+                            java.time.Duration.ofMillis(500)));
+            player.showTitle(successTitle);
+
+            // Action bar com info
+            player.sendActionBar(
+                    net.kyori.adventure.text.Component.text("✓ Você recebeu " + rewardStr + " pelo trabalho!")
+                            .color(net.kyori.adventure.text.format.NamedTextColor.GREEN));
+
+            // Som de sucesso
+            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
+            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+
             WorkGui.open(player, jobsService, workService);
             return;
         }
@@ -273,7 +308,8 @@ public final class GuiListener implements Listener {
             double net = taxService.applyTax(shopItem.sellPrice(), "tax.shop.sell");
             economyService.addBalance(player.getUniqueId(), net);
             missionsService.recordSell(player.getUniqueId(), 1);
-            logService.add(player.getUniqueId(), "Venda loja +" + economyService.getCurrencySymbol() + String.format("%.2f", net));
+            logService.add(player.getUniqueId(),
+                    "Venda loja +" + economyService.getCurrencySymbol() + String.format("%.2f", net));
             player.sendMessage("Você vendeu 1x " + shopItem.displayName() + " por "
                     + economyService.getCurrencySymbol() + String.format("%.2f", net));
             return;
@@ -290,7 +326,8 @@ public final class GuiListener implements Listener {
         player.getInventory().addItem(new ItemStack(type, 1));
         player.sendMessage("Você comprou 1x " + shopItem.displayName() + " por "
                 + economyService.getCurrencySymbol() + String.format("%.2f", price));
-        logService.add(player.getUniqueId(), "Compra loja -" + economyService.getCurrencySymbol() + String.format("%.2f", price));
+        logService.add(player.getUniqueId(),
+                "Compra loja -" + economyService.getCurrencySymbol() + String.format("%.2f", price));
     }
 
     private void handleBankClick(Player player, ItemStack item) {
@@ -394,7 +431,8 @@ public final class GuiListener implements Listener {
                     return;
                 }
                 economyService.addBalance(player.getUniqueId(), mission.reward());
-                logService.add(player.getUniqueId(), "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
+                logService.add(player.getUniqueId(),
+                        "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
                 MissionsGui.open(player, economyService, missionsService);
                 return;
             }
