@@ -79,7 +79,7 @@ public final class UpdateCommand implements CommandExecutor {
 
                 sender.sendMessage(Component.text("✓ Update baixado com sucesso!").color(NamedTextColor.GREEN));
                 sender.sendMessage(Component.text("Reiniciando servidor para aplicar...").color(NamedTextColor.YELLOW));
-                updateService.shutdownServer();
+                updateService.restartServer();
                 return true;
             }
 
@@ -99,7 +99,7 @@ public final class UpdateCommand implements CommandExecutor {
 
                 sender.sendMessage(Component.text("✓ Download forçado concluído!").color(NamedTextColor.GREEN));
                 sender.sendMessage(Component.text("Reiniciando servidor...").color(NamedTextColor.YELLOW));
-                updateService.shutdownServer();
+                updateService.restartServer();
                 return true;
             }
 

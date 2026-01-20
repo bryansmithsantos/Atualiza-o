@@ -177,10 +177,13 @@ public final class UpdateService {
     }
 
     /**
-     * Desliga o servidor para aplicar a atualização
+     * Reinicia o servidor para aplicar a atualização
      */
-    public void shutdownServer() {
-        Bukkit.getScheduler().runTask(plugin, Bukkit::shutdown);
+    public void restartServer() {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getLogger().info("Reiniciando servidor via Spigot API...");
+            Bukkit.spigot().restart();
+        });
     }
 
     public String getLastKnownCommit() {
