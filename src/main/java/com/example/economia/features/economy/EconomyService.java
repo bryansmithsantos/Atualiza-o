@@ -94,4 +94,11 @@ public final class EconomyService {
     public Map<UUID, Double> getBalances() {
         return Map.copyOf(balances);
     }
+
+    public java.util.List<Map.Entry<UUID, Double>> getLeaderboard(int limit) {
+        return balances.entrySet().stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .limit(limit)
+                .toList();
+    }
 }
