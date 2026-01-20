@@ -114,6 +114,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         getServer().getPluginManager()
                 .registerEvents(new AuthInputListener(authService, economyService, jobsService, workService), this);
         getServer().getPluginManager()
+                .registerEvents(new com.example.economia.features.missions.MissionsListener(missionsService), this);
+        getServer().getPluginManager()
                 .registerEvents(new GuiListener(authService, economyService, jobsService, workService, shopService,
                         bankService, vaultService, upgradesService, missionsService, licenseService, marketService,
                         companyService, finesService,
