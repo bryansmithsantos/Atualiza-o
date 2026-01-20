@@ -30,6 +30,9 @@ import com.example.economia.features.update.UpdateCommand;
 import com.example.economia.features.update.UpdateService;
 import com.example.economia.features.upgrades.UpgradesService;
 import com.example.economia.features.vault.VaultService;
+import com.example.economia.features.generators.GeneratorService;
+import com.example.economia.features.generators.GeneratorListener;
+import com.example.economia.features.generators.GeneratorsGui;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
@@ -51,6 +54,7 @@ public final class EconomiaPlugin extends JavaPlugin {
     private LogService logService;
     private TaxService taxService;
     private UpdateService updateService;
+    private GeneratorService generatorService;
 
     @Override
     public void onEnable() {
@@ -82,6 +86,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         logService.load();
         taxService = new TaxService(this);
         updateService = new UpdateService(this);
+        generatorService = new GeneratorService(this);
+        generatorService.load();
 
         workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService,
                 companyService, logService);
@@ -102,6 +108,8 @@ public final class EconomiaPlugin extends JavaPlugin {
                         logService, taxService), this);
         getServer().getPluginManager().registerEvents(new com.example.economia.features.treefeller.TreeFellerListener(),
                 this);
+        getServer().getPluginManager().registerEvents(new GeneratorListener(generatorService, this), this);
+        getServer().getPluginManager().registerEvents(new GeneratorsGui(generatorService, economyService), this);
         if (getCommand("money") != null) {
             MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
             getCommand("money").setExecutor(moneyCommand);
@@ -172,6 +180,9 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (logService != null) {
             logService.save();
+        }
+        if (generatorService != null) {
+            generatorService.save();
         }
         getLogger().info("EconomiaPlugin desabilitado.");
     }

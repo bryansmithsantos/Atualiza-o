@@ -83,6 +83,18 @@ public final class EconomyService {
         return true;
     }
 
+    public void withdraw(Player player, double amount) {
+        removeBalance(player.getUniqueId(), amount);
+    }
+
+    public void deposit(Player player, double amount) {
+        addBalance(player.getUniqueId(), amount);
+    }
+
+    public double getBalance(Player player) {
+        return getBalance(player.getUniqueId());
+    }
+
     public double getStartingBalance() {
         return plugin.getConfig().getDouble("economy.starting-balance", 0.0);
     }

@@ -14,7 +14,8 @@ public final class MainMenuGui {
     private MainMenuGui() {
     }
 
-    public static void open(Player player, EconomyService economyService, JobsService jobsService, WorkService workService) {
+    public static void open(Player player, EconomyService economyService, JobsService jobsService,
+            WorkService workService) {
         Inventory inv = Bukkit.createInventory(null, 27, GuiTitles.MAIN);
         String balance = economyService.formatBalance(player.getUniqueId());
         String jobName = jobsService.getCurrentJob(player).displayName();
@@ -31,6 +32,7 @@ public final class MainMenuGui {
         inv.setItem(21, GuiUtils.item(Material.PAPER, "Multas", "Pagar pendências"));
         inv.setItem(22, GuiUtils.item(Material.CLOCK, "Rankings", "Top jogadores"));
         inv.setItem(23, GuiUtils.item(Material.BOOKSHELF, "Histórico", "Movimentações"));
+        inv.setItem(24, GuiUtils.item(Material.FURNACE, "Geradores", "Comprar geradores de minérios"));
         inv.setItem(26, GuiUtils.item(Material.BARRIER, "Sair", "Fechar painel"));
 
         player.openInventory(inv);

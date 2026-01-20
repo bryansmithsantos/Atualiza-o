@@ -21,6 +21,7 @@ public final class GuiTitles {
     public static final String FINES_TEXT = "Blinded - Multas";
     public static final String LEADERBOARDS_TEXT = "Blinded - Rankings";
     public static final String LOGS_TEXT = "Blinded - Histórico";
+    public static final String GENERATORS_TEXT = "Blinded - Geradores";
 
     public static final Component AUTH = Component.text(AUTH_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component MAIN = Component.text(MAIN_TEXT, NamedTextColor.DARK_GREEN);
@@ -38,6 +39,7 @@ public final class GuiTitles {
     public static final Component FINES = Component.text(FINES_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component LEADERBOARDS = Component.text(LEADERBOARDS_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component LOGS = Component.text(LOGS_TEXT, NamedTextColor.DARK_GREEN);
+    public static final Component GENERATORS = Component.text(GENERATORS_TEXT, NamedTextColor.DARK_GREEN);
 
     private GuiTitles() {
     }

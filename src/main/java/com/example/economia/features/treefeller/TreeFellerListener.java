@@ -67,12 +67,24 @@ public final class TreeFellerListener implements Listener {
         // Validações iniciais
         if (!isLog(origin.getType()))
             return;
-        if (!player.isSneaking())
+
+        // Debug
+        // System.out.println("DEBUG: TreeFeller check - Player: " + player.getName());
+        // System.out.println("DEBUG: isSneaking: " + player.isSneaking());
+        // System.out.println("DEBUG: hasAxe: " + hasAxeInHand(player));
+        // System.out.println("DEBUG: hasPermission: " +
+        // player.hasPermission("blinded.treefeller"));
+
+        if (!player.isSneaking()) {
             return;
-        if (!hasAxeInHand(player))
+        }
+        if (!hasAxeInHand(player)) {
             return;
-        if (!player.hasPermission("blinded.treefeller"))
+        }
+        if (!player.hasPermission("blinded.treefeller")) {
+            // player.sendMessage("§cDebug: Sem permissão blinded.treefeller");
             return;
+        }
 
         ItemStack axe = player.getInventory().getItemInMainHand();
 

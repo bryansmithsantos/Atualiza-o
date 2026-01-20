@@ -12,17 +12,49 @@ public final class AuthGui {
 
     public static void openRegister(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, GuiTitles.AUTH);
-        inv.setItem(11, GuiUtils.item(Material.EMERALD, "Registrar", "Clique e digite sua senha no chat"));
-        inv.setItem(15, GuiUtils.item(Material.PAPER, "Login", "Já tem conta?"));
-        inv.setItem(22, GuiUtils.item(Material.BOOK, "Ajuda", "Digite 'cancelar' para cancelar"));
+
+        // Decoração
+        for (int i = 0; i < 27; i++) {
+            inv.setItem(i, GuiUtils.item(Material.BLACK_STAINED_GLASS_PANE, " ", " "));
+        }
+
+        inv.setItem(11, GuiUtils.item(Material.EMERALD_BLOCK, "§a§lREGISTRAR",
+                "§7Clique aqui pare criar sua conta.",
+                "",
+                "§e▶ Clique para iniciar"));
+
+        inv.setItem(13, GuiUtils.item(Material.BOOK, "§6§lAJUDA",
+                "§7Siga as instruções no chat",
+                "§7para criar sua senha segura."));
+
+        inv.setItem(15, GuiUtils.item(Material.PAPER, "§fLogin",
+                "§7Já possui uma conta?",
+                "§7Clique para entrar."));
+
         player.openInventory(inv);
     }
 
     public static void openLogin(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, GuiTitles.AUTH);
-        inv.setItem(11, GuiUtils.item(Material.PAPER, "Login", "Clique e digite sua senha no chat"));
-        inv.setItem(15, GuiUtils.item(Material.EMERALD, "Registrar", "Criar nova conta"));
-        inv.setItem(22, GuiUtils.item(Material.BOOK, "Ajuda", "Digite 'cancelar' para cancelar"));
+
+        // Decoração
+        for (int i = 0; i < 27; i++) {
+            inv.setItem(i, GuiUtils.item(Material.BLACK_STAINED_GLASS_PANE, " ", " "));
+        }
+
+        inv.setItem(11, GuiUtils.item(Material.PAPER, "§a§lLOGIN",
+                "§7Clique aqui para entrar na sua conta.",
+                "",
+                "§e▶ Clique para iniciar"));
+
+        inv.setItem(13, GuiUtils.item(Material.BOOK, "§6§lAJUDA",
+                "§7Digite sua senha no chat",
+                "§7após clicar no botão."));
+
+        inv.setItem(15, GuiUtils.item(Material.EMERALD_ORE, "§fRegistrar",
+                "§7Não tem conta?",
+                "§7Clique para criar uma."));
+
         player.openInventory(inv);
     }
 }

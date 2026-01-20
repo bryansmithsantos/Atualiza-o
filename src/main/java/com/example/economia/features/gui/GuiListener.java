@@ -204,6 +204,8 @@ public final class GuiListener implements Listener {
             LeaderboardsGui.open(player, economyService, jobsService, missionsService);
         } else if (type == Material.BOOKSHELF) {
             LogsGui.open(player, logService);
+        } else if (type == Material.FURNACE) {
+            com.example.economia.features.generators.GeneratorsGui.open(player);
         } else if (type == Material.BARRIER) {
             player.closeInventory();
         }
