@@ -29,6 +29,29 @@ commands:
   blinded:
     description: Atualizacoes do plugin
     usage: /blinded <check|download>
+  painel_admin:
+    description: Abre o painel administrativo
+    usage: /painel_admin
+    aliases: [admin]
+  ping:
+    description: Mostra seu ping atual
+    usage: /ping
+  anuncio:
+    description: Envia um anuncio global
+    usage: /anuncio <mensagem>
+    permission: blinded.admin
+  sethome:
+    description: Define um home
+    usage: /sethome [nome]
+  home:
+    description: Teleporta para um home
+    usage: /home [nome]
+  delhome:
+    description: Deleta um home
+    usage: /delhome [nome]
+  homes:
+    description: Lista seus homes
+    usage: /homes
 permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.

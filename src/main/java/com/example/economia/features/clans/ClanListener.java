@@ -24,16 +24,16 @@ public class ClanListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncChatEvent event) {
-        // Player player = event.getPlayer();
-        // Clan clan = clanService.getClan(player.getUniqueId());
+        Player player = event.getPlayer();
+        Clan clan = clanService.getClan(player.getUniqueId());
 
-        // if (clan != null) {
-        // Component original = event.renderer().render(player, player.displayName(),
-        // event.message(), player);
-        // Component prefix = Component.text("[" + clan.getTag() + "] ",
-        // NamedTextColor.GRAY);
-        // Simples prefixo: [TAG] Player: Msg
-        // }
+        if (clan != null) {
+            event.renderer((source, sourceDisplayName, message, viewer) -> Component
+                    .text("[" + clan.getTag() + "] ", NamedTextColor.GRAY)
+                    .append(sourceDisplayName)
+                    .append(Component.text(": ", NamedTextColor.GRAY))
+                    .append(message));
+        }
     }
 
     // Usando formatação de chat mais compatível com Paper moderno

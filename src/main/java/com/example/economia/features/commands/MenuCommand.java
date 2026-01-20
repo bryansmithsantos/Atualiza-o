@@ -19,7 +19,8 @@ public final class MenuCommand implements CommandExecutor {
     private final JobsService jobsService;
     private final WorkService workService;
 
-    public MenuCommand(AuthService authService, EconomyService economyService, JobsService jobsService, WorkService workService) {
+    public MenuCommand(AuthService authService, EconomyService economyService, JobsService jobsService,
+            WorkService workService) {
         this.authService = authService;
         this.economyService = economyService;
         this.jobsService = jobsService;

@@ -17,6 +17,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
+import com.example.economia.features.economy.EconomyService;
+import com.example.economia.features.jobs.JobsService;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -33,6 +36,14 @@ import net.kyori.adventure.title.Title;
  * - Limite de blocos para evitar lag
  */
 public final class TreeFellerListener implements Listener {
+
+    private final JobsService jobsService;
+    private final EconomyService economyService;
+
+    public TreeFellerListener(JobsService jobsService, EconomyService economyService) {
+        this.jobsService = jobsService;
+        this.economyService = economyService;
+    }
 
     private static final int MAX_LOGS = 128;
     private static final int MAX_LEAVES = 256;
@@ -76,6 +87,10 @@ public final class TreeFellerListener implements Listener {
         // player.hasPermission("blinded.treefeller"));
 
         if (!player.isSneaking()) {
+            if (hasAxeInHand(player)) {
+                player.sendActionBar(
+                        Component.text("💡 Dica: Agache para cortar a árvore inteira!").color(NamedTextColor.YELLOW));
+            }
             return;
         }
         if (!hasAxeInHand(player)) {
@@ -125,8 +140,25 @@ public final class TreeFellerListener implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
         }
 
+        // Calcular recompensas se for Lenhador
+        double moneyEarned = 0;
+        int xpEarned = 0;
+
+        if (jobsService.getCurrentJob(player).id().equals("lenhador")) {
+            double pricePerLog = 5.0; // Valor fixo por tronco
+            int xpPerLog = 2;
+
+            moneyEarned = tree.logs.size() * pricePerLog;
+            xpEarned = tree.logs.size() * xpPerLog;
+
+            if (moneyEarned > 0) {
+                economyService.addBalance(player.getUniqueId(), moneyEarned);
+                jobsService.addXp(player, "lenhador", xpEarned);
+            }
+        }
+
         // Feedback visual
-        showSuccess(player, tree.logs.size(), tree.leaves.size());
+        showSuccess(player, tree.logs.size(), tree.leaves.size(), moneyEarned, xpEarned);
     }
 
     /**
@@ -227,15 +259,19 @@ public final class TreeFellerListener implements Listener {
         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
     }
 
-    private void showSuccess(Player player, int logs, int leaves) {
+    private void showSuccess(Player player, int logs, int leaves, double money, int xp) {
         Title title = Title.title(
                 Component.text("🌲 Árvore Derrubada!").color(NamedTextColor.GREEN),
-                Component.text("+" + logs + " madeiras • " + leaves + " folhas").color(NamedTextColor.YELLOW),
+                Component.text("+" + logs + " madeiras" + (money > 0 ? " • §a+$" + money : ""))
+                        .color(NamedTextColor.YELLOW),
                 Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1500), Duration.ofMillis(300)));
         player.showTitle(title);
 
-        player.sendActionBar(
-                Component.text("✓ TreeFeller ativo! Segure SHIFT + Machado").color(NamedTextColor.GRAY));
+        String actionMsg = "✓ TreeFeller ativo!";
+        if (xp > 0)
+            actionMsg += " §b+" + xp + " XP Lenhador";
+
+        player.sendActionBar(Component.text(actionMsg).color(NamedTextColor.GRAY));
 
         player.playSound(player.getLocation(), Sound.BLOCK_WOOD_BREAK, 1.0f, 0.8f);
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);

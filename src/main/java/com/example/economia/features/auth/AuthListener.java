@@ -42,6 +42,12 @@ public final class AuthListener implements Listener {
         player.sendMessage(Component.empty());
 
         if (authService.isRegistered(player.getUniqueId())) {
+
+            if (authService.tryAutoLogin(player)) {
+                Messages.success(player, "🔓 Login automático realizado! (Sessão ativa)");
+                return;
+            }
+
             // Título de login
             Title loginTitle = Title.title(
                     Component.text("🔐 Login Necessário").color(NamedTextColor.GOLD),

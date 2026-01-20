@@ -36,6 +36,9 @@ import com.example.economia.features.generators.GeneratorsGui;
 import com.example.economia.features.clans.ClanService;
 import com.example.economia.features.clans.ClanListener;
 import com.example.economia.features.clans.ClanGui;
+import com.example.economia.features.gui.AdminPanelGui;
+import com.example.economia.features.homes.HomeService;
+import com.example.economia.features.homes.HomeCommand;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
@@ -59,6 +62,7 @@ public final class EconomiaPlugin extends JavaPlugin {
     private UpdateService updateService;
     private GeneratorService generatorService;
     private ClanService clanService;
+    private HomeService homeService;
 
     @Override
     public void onEnable() {
@@ -94,6 +98,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         generatorService.load();
         clanService = new ClanService(this, economyService);
         clanService.load();
+        homeService = new HomeService(this);
+        homeService.load();
 
         workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService,
                 companyService, logService);
@@ -112,12 +118,14 @@ public final class EconomiaPlugin extends JavaPlugin {
                         bankService, vaultService, upgradesService, missionsService, licenseService, marketService,
                         companyService, finesService,
                         logService, taxService, clanService), this);
-        getServer().getPluginManager().registerEvents(new com.example.economia.features.treefeller.TreeFellerListener(),
+        getServer().getPluginManager().registerEvents(
+                new com.example.economia.features.treefeller.TreeFellerListener(jobsService, economyService),
                 this);
         getServer().getPluginManager().registerEvents(new GeneratorListener(generatorService, this), this);
         getServer().getPluginManager().registerEvents(new GeneratorsGui(generatorService, economyService), this);
         getServer().getPluginManager().registerEvents(new ClanListener(clanService), this);
         getServer().getPluginManager().registerEvents(new ClanGui(clanService), this);
+        getServer().getPluginManager().registerEvents(new AdminPanelGui(), this);
         if (getCommand("money") != null) {
             MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
             getCommand("money").setExecutor(moneyCommand);
@@ -141,6 +149,30 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (getCommand("blinded") != null) {
             getCommand("blinded").setExecutor(new UpdateCommand(updateService));
+        }
+        if (getCommand("painel_admin") != null) {
+            getCommand("painel_admin").setExecutor((sender, command, label, args) -> {
+                if (sender instanceof org.bukkit.entity.Player player && player.hasPermission("blinded.admin")) {
+                    AdminPanelGui.open(player);
+                } else {
+                    sender.sendMessage("§cSem permissão.");
+                }
+                return true;
+            });
+        }
+        if (getCommand("ping") != null) {
+            getCommand("ping").setExecutor(new com.example.economia.features.commands.PingCommand());
+        }
+        if (getCommand("anuncio") != null) {
+            getCommand("anuncio").setExecutor(new com.example.economia.features.commands.AnuncioCommand());
+        }
+
+        if (getCommand("sethome") != null) {
+            HomeCommand homeCmd = new HomeCommand(homeService);
+            getCommand("sethome").setExecutor(homeCmd);
+            getCommand("home").setExecutor(homeCmd);
+            getCommand("delhome").setExecutor(homeCmd);
+            getCommand("homes").setExecutor(homeCmd);
         }
         getLogger().info("EconomiaPlugin habilitado.");
     }
@@ -194,6 +226,9 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (clanService != null) {
             clanService.save();
+        }
+        if (homeService != null) {
+            homeService.save();
         }
         getLogger().info("EconomiaPlugin desabilitado.");
     }

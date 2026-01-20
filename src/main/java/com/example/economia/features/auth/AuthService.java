@@ -46,8 +46,11 @@ public final class AuthService {
             for (String key : authConfig.getConfigurationSection("auth").getKeys(false)) {
                 String salt = authConfig.getString("auth." + key + ".salt", "");
                 String hash = authConfig.getString("auth." + key + ".hash", "");
+                String lastIp = authConfig.getString("auth." + key + ".lastIp", null);
+                long lastTimestamp = authConfig.getLong("auth." + key + ".lastTimestamp", 0);
+
                 if (!salt.isEmpty() && !hash.isEmpty()) {
-                    records.put(UUID.fromString(key), new AuthRecord(salt, hash));
+                    records.put(UUID.fromString(key), new AuthRecord(salt, hash, lastIp, lastTimestamp));
                 }
             }
         }
@@ -60,6 +63,8 @@ public final class AuthService {
         for (Map.Entry<UUID, AuthRecord> entry : records.entrySet()) {
             authConfig.set("auth." + entry.getKey() + ".salt", entry.getValue().salt());
             authConfig.set("auth." + entry.getKey() + ".hash", entry.getValue().hash());
+            authConfig.set("auth." + entry.getKey() + ".lastIp", entry.getValue().lastIp());
+            authConfig.set("auth." + entry.getKey() + ".lastTimestamp", entry.getValue().lastTimestamp());
         }
         try {
             authConfig.save(authFile);
@@ -99,7 +104,7 @@ public final class AuthService {
         }
         String salt = createSalt();
         String hash = hash(salt, password);
-        records.put(uuid, new AuthRecord(salt, hash));
+        records.put(uuid, new AuthRecord(salt, hash, null, 0));
         save();
         return true;
     }
@@ -110,7 +115,35 @@ public final class AuthService {
             return false;
         }
         String hash = hash(record.salt(), password);
-        return hash.equals(record.hash());
+        boolean valid = hash.equals(record.hash());
+
+        if (valid) {
+            // Update session info
+            String ip = player.getAddress().getAddress().getHostAddress();
+            records.put(player.getUniqueId(),
+                    new AuthRecord(record.salt(), record.hash(), ip, System.currentTimeMillis()));
+            save();
+        }
+        return valid;
+    }
+
+    public boolean tryAutoLogin(Player player) {
+        AuthRecord record = records.get(player.getUniqueId());
+        if (record == null || record.lastIp() == null)
+            return false;
+
+        String currentIp = player.getAddress().getAddress().getHostAddress();
+        long sixHours = 6 * 60 * 60 * 1000;
+
+        if (record.lastIp().equals(currentIp) && (System.currentTimeMillis() - record.lastTimestamp() < sixHours)) {
+            setLoggedIn(player.getUniqueId(), true);
+            // Refresh timestamp
+            records.put(player.getUniqueId(),
+                    new AuthRecord(record.salt(), record.hash(), currentIp, System.currentTimeMillis()));
+            save();
+            return true;
+        }
+        return false;
     }
 
     public int getMinPasswordLength() {
@@ -134,5 +167,6 @@ public final class AuthService {
         }
     }
 
-    private record AuthRecord(String salt, String hash) {}
+    private record AuthRecord(String salt, String hash, String lastIp, long lastTimestamp) {
+    }
 }

@@ -23,9 +23,11 @@ public final class GuiTitles {
     public static final String LOGS_TEXT = "Blinded - Histórico";
     public static final String GENERATORS_TEXT = "Blinded - Geradores";
     public static final String CLAN_TEXT = "Blinded - Clan";
+    public static final String ADMIN_PANEL_TEXT = "Blinded - Admin";
 
     public static final Component AUTH = Component.text(AUTH_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component CLAN = Component.text(CLAN_TEXT, NamedTextColor.DARK_GREEN);
+    public static final Component ADMIN_PANEL = Component.text(ADMIN_PANEL_TEXT, NamedTextColor.RED);
     public static final Component MAIN = Component.text(MAIN_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component JOBS = Component.text(JOBS_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component WORK = Component.text(WORK_TEXT, NamedTextColor.DARK_GREEN);
