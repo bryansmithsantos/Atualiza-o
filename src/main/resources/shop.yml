@@ -1,0 +1,101 @@
+items:
+  stone:
+    name: "Pedra"
+    material: "STONE"
+    buy: 5
+    sell: 2
+  coal:
+    name: "Carvão"
+    material: "COAL"
+    buy: 10
+    sell: 4
+  iron_ingot:
+    name: "Ferro"
+    material: "IRON_INGOT"
+    buy: 30
+    sell: 12
+  gold_ingot:
+    name: "Ouro"
+    material: "GOLD_INGOT"
+    buy: 45
+    sell: 18
+  diamond:
+    name: "Diamante"
+    material: "DIAMOND"
+    buy: 120
+    sell: 45
+  emerald:
+    name: "Esmeralda"
+    material: "EMERALD"
+    buy: 150
+    sell: 60
+  oak_log:
+    name: "Tronco de Carvalho"
+    material: "OAK_LOG"
+    buy: 8
+    sell: 3
+  wheat:
+    name: "Trigo"
+    material: "WHEAT"
+    buy: 6
+    sell: 2
+  carrot:
+    name: "Cenoura"
+    material: "CARROT"
+    buy: 6
+    sell: 2
+  potato:
+    name: "Batata"
+    material: "POTATO"
+    buy: 6
+    sell: 2
+  cod:
+    name: "Bacalhau"
+    material: "COD"
+    buy: 12
+    sell: 4
+  salmon:
+    name: "Salmão"
+    material: "SALMON"
+    buy: 12
+    sell: 4
+  beef:
+    name: "Bife"
+    material: "BEEF"
+    buy: 14
+    sell: 5
+  leather:
+    name: "Couro"
+    material: "LEATHER"
+    buy: 10
+    sell: 4
+  string:
+    name: "Linha"
+    material: "STRING"
+    buy: 9
+    sell: 3
+  bone:
+    name: "Osso"
+    material: "BONE"
+    buy: 8
+    sell: 3
+  redstone:
+    name: "Redstone"
+    material: "REDSTONE"
+    buy: 20
+    sell: 8
+  lapis:
+    name: "Lápis"
+    material: "LAPIS_LAZULI"
+    buy: 18
+    sell: 7
+  quartz:
+    name: "Quartzo"
+    material: "QUARTZ"
+    buy: 22
+    sell: 9
+  copper:
+    name: "Cobre"
+    material: "COPPER_INGOT"
+    buy: 16
+    sell: 6

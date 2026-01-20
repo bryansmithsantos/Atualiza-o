@@ -1,0 +1,164 @@
+package com.example.economia;
+
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.example.economia.features.auth.AuthInputListener;
+import com.example.economia.features.auth.AuthListener;
+import com.example.economia.features.auth.AuthService;
+import com.example.economia.features.bank.BankService;
+import com.example.economia.features.bedrock.BedrockSupport;
+import com.example.economia.features.commands.AuthCommand;
+import com.example.economia.features.commands.FinesCommand;
+import com.example.economia.features.commands.MenuCommand;
+import com.example.economia.features.commands.ShopCommand;
+import com.example.economia.features.company.CompanyService;
+import com.example.economia.features.economy.EconomyListener;
+import com.example.economia.features.economy.EconomyService;
+import com.example.economia.features.economy.MoneyCommand;
+import com.example.economia.features.fines.FinesService;
+import com.example.economia.features.gui.GuiListener;
+import com.example.economia.features.jobs.JobsService;
+import com.example.economia.features.jobs.WorkService;
+import com.example.economia.features.licenses.LicenseService;
+import com.example.economia.features.logs.LogService;
+import com.example.economia.features.market.MarketService;
+import com.example.economia.features.missions.MissionsService;
+import com.example.economia.features.scoreboard.ScoreboardService;
+import com.example.economia.features.shop.ShopService;
+import com.example.economia.features.tax.TaxService;
+import com.example.economia.features.upgrades.UpgradesService;
+import com.example.economia.features.vault.VaultService;
+
+public final class EconomiaPlugin extends JavaPlugin {
+
+    private ScoreboardService scoreboardService;
+    private BedrockSupport bedrockSupport;
+    private EconomyService economyService;
+    private AuthService authService;
+    private JobsService jobsService;
+    private WorkService workService;
+    private ShopService shopService;
+    private BankService bankService;
+    private VaultService vaultService;
+    private UpgradesService upgradesService;
+    private MissionsService missionsService;
+    private LicenseService licenseService;
+    private MarketService marketService;
+    private CompanyService companyService;
+    private FinesService finesService;
+    private LogService logService;
+    private TaxService taxService;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        bedrockSupport = new BedrockSupport(this);
+        economyService = new EconomyService(this);
+        economyService.load();
+        authService = new AuthService(this);
+        authService.load();
+        jobsService = new JobsService(this);
+        jobsService.load();
+        bankService = new BankService(this);
+        bankService.load();
+        vaultService = new VaultService(this);
+        vaultService.load();
+        upgradesService = new UpgradesService(this);
+        upgradesService.load();
+        missionsService = new MissionsService(this);
+        missionsService.load();
+        licenseService = new LicenseService(this);
+        licenseService.load();
+        marketService = new MarketService(this);
+        marketService.load();
+        companyService = new CompanyService(this);
+        companyService.load();
+        finesService = new FinesService(this);
+        finesService.load();
+        logService = new LogService(this);
+        logService.load();
+        taxService = new TaxService(this);
+
+        workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService, companyService, logService);
+        shopService = new ShopService(this);
+        shopService.load();
+
+        scoreboardService = new ScoreboardService(this, bedrockSupport, economyService);
+        scoreboardService.start();
+        getServer().getPluginManager().registerEvents(scoreboardService.getPlayerListener(), this);
+        getServer().getPluginManager().registerEvents(new EconomyListener(economyService), this);
+        getServer().getPluginManager().registerEvents(new AuthListener(authService), this);
+        getServer().getPluginManager().registerEvents(new AuthInputListener(authService, economyService, jobsService, workService), this);
+        getServer().getPluginManager().registerEvents(new GuiListener(authService, economyService, jobsService, workService, shopService,
+                bankService, vaultService, upgradesService, missionsService, licenseService, marketService, companyService, finesService,
+                logService, taxService), this);
+        if (getCommand("money") != null) {
+            MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
+            getCommand("money").setExecutor(moneyCommand);
+            getCommand("money").setTabCompleter(moneyCommand);
+        }
+        if (getCommand("painel") != null) {
+            getCommand("painel").setExecutor(new MenuCommand(authService, economyService, jobsService, workService));
+        }
+        if (getCommand("login") != null) {
+            getCommand("login").setExecutor(new AuthCommand(authService, false));
+        }
+        if (getCommand("register") != null) {
+            getCommand("register").setExecutor(new AuthCommand(authService, true));
+        }
+        if (getCommand("loja") != null) {
+            getCommand("loja").setExecutor(new ShopCommand(authService, shopService, economyService.getCurrencySymbol()));
+        }
+        if (getCommand("multa") != null) {
+            getCommand("multa").setExecutor(new FinesCommand(finesService, logService));
+        }
+        getLogger().info("EconomiaPlugin habilitado.");
+    }
+
+    @Override
+    public void onDisable() {
+        if (scoreboardService != null) {
+            scoreboardService.stop();
+        }
+        if (economyService != null) {
+            economyService.save();
+        }
+        if (authService != null) {
+            authService.save();
+        }
+        if (jobsService != null) {
+            jobsService.save();
+        }
+        if (shopService != null) {
+            shopService.save();
+        }
+        if (bankService != null) {
+            bankService.save();
+        }
+        if (vaultService != null) {
+            vaultService.save();
+        }
+        if (upgradesService != null) {
+            upgradesService.save();
+        }
+        if (missionsService != null) {
+            missionsService.save();
+        }
+        if (licenseService != null) {
+            licenseService.save();
+        }
+        if (marketService != null) {
+            marketService.save();
+        }
+        if (companyService != null) {
+            companyService.save();
+        }
+        if (finesService != null) {
+            finesService.save();
+        }
+        if (logService != null) {
+            logService.save();
+        }
+        getLogger().info("EconomiaPlugin desabilitado.");
+    }
+}
