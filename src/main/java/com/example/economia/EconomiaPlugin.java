@@ -33,6 +33,9 @@ import com.example.economia.features.vault.VaultService;
 import com.example.economia.features.generators.GeneratorService;
 import com.example.economia.features.generators.GeneratorListener;
 import com.example.economia.features.generators.GeneratorsGui;
+import com.example.economia.features.clans.ClanService;
+import com.example.economia.features.clans.ClanListener;
+import com.example.economia.features.clans.ClanGui;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
@@ -55,6 +58,7 @@ public final class EconomiaPlugin extends JavaPlugin {
     private TaxService taxService;
     private UpdateService updateService;
     private GeneratorService generatorService;
+    private ClanService clanService;
 
     @Override
     public void onEnable() {
@@ -88,6 +92,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         updateService = new UpdateService(this);
         generatorService = new GeneratorService(this);
         generatorService.load();
+        clanService = new ClanService(this, economyService);
+        clanService.load();
 
         workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService,
                 companyService, logService);
@@ -105,11 +111,13 @@ public final class EconomiaPlugin extends JavaPlugin {
                 .registerEvents(new GuiListener(authService, economyService, jobsService, workService, shopService,
                         bankService, vaultService, upgradesService, missionsService, licenseService, marketService,
                         companyService, finesService,
-                        logService, taxService), this);
+                        logService, taxService, clanService), this);
         getServer().getPluginManager().registerEvents(new com.example.economia.features.treefeller.TreeFellerListener(),
                 this);
         getServer().getPluginManager().registerEvents(new GeneratorListener(generatorService, this), this);
         getServer().getPluginManager().registerEvents(new GeneratorsGui(generatorService, economyService), this);
+        getServer().getPluginManager().registerEvents(new ClanListener(clanService), this);
+        getServer().getPluginManager().registerEvents(new ClanGui(clanService), this);
         if (getCommand("money") != null) {
             MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
             getCommand("money").setExecutor(moneyCommand);
@@ -183,6 +191,9 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (generatorService != null) {
             generatorService.save();
+        }
+        if (clanService != null) {
+            clanService.save();
         }
         getLogger().info("EconomiaPlugin desabilitado.");
     }

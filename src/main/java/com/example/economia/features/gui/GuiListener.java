@@ -30,6 +30,8 @@ import com.example.economia.features.tax.TaxService;
 import com.example.economia.features.upgrades.UpgradeType;
 import com.example.economia.features.upgrades.UpgradesService;
 import com.example.economia.features.vault.VaultService;
+import com.example.economia.features.clans.ClanService;
+import com.example.economia.features.clans.ClanGui;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
@@ -50,13 +52,15 @@ public final class GuiListener implements Listener {
     private final FinesService finesService;
     private final LogService logService;
     private final TaxService taxService;
+    private final ClanService clanService;
 
     public GuiListener(AuthService authService, EconomyService economyService, JobsService jobsService,
             WorkService workService,
             ShopService shopService, BankService bankService, VaultService vaultService,
             UpgradesService upgradesService,
             MissionsService missionsService, LicenseService licenseService, MarketService marketService,
-            CompanyService companyService, FinesService finesService, LogService logService, TaxService taxService) {
+            CompanyService companyService, FinesService finesService, LogService logService, TaxService taxService,
+            ClanService clanService) {
         this.authService = authService;
         this.economyService = economyService;
         this.jobsService = jobsService;
@@ -72,6 +76,7 @@ public final class GuiListener implements Listener {
         this.finesService = finesService;
         this.logService = logService;
         this.taxService = taxService;
+        this.clanService = clanService;
     }
 
     @EventHandler
@@ -206,6 +211,8 @@ public final class GuiListener implements Listener {
             LogsGui.open(player, logService);
         } else if (type == Material.FURNACE) {
             com.example.economia.features.generators.GeneratorsGui.open(player);
+        } else if (type == Material.WHITE_BANNER) {
+            ClanGui.open(player, clanService);
         } else if (type == Material.BARRIER) {
             player.closeInventory();
         }

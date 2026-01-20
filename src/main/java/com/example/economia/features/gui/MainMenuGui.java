@@ -33,6 +33,7 @@ public final class MainMenuGui {
         inv.setItem(22, GuiUtils.item(Material.CLOCK, "Rankings", "Top jogadores"));
         inv.setItem(23, GuiUtils.item(Material.BOOKSHELF, "Histórico", "Movimentações"));
         inv.setItem(24, GuiUtils.item(Material.FURNACE, "Geradores", "Comprar geradores de minérios"));
+        inv.setItem(25, GuiUtils.item(Material.WHITE_BANNER, "Clan", "Gerenciar seu clan"));
         inv.setItem(26, GuiUtils.item(Material.BARRIER, "Sair", "Fechar painel"));
 
         player.openInventory(inv);

@@ -28,4 +28,20 @@ public final class GuiUtils {
         }
         return item;
     }
+
+    public static ItemStack head(java.util.UUID owner, String name, String... lore) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        org.bukkit.inventory.meta.SkullMeta meta = (org.bukkit.inventory.meta.SkullMeta) item.getItemMeta();
+        if (meta != null) {
+            meta.setOwningPlayer(org.bukkit.Bukkit.getOfflinePlayer(owner));
+            meta.displayName(Component.text(name, NamedTextColor.WHITE));
+            if (lore.length > 0) {
+                meta.lore(Arrays.stream(lore)
+                        .map(line -> Component.text(line, NamedTextColor.GRAY))
+                        .toList());
+            }
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
 }
