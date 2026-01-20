@@ -174,6 +174,9 @@ public final class EconomiaPlugin extends JavaPlugin {
             getCommand("delhome").setExecutor(homeCmd);
             getCommand("homes").setExecutor(homeCmd);
         }
+        if (getCommand("vender") != null) {
+            getCommand("vender").setExecutor(new com.example.economia.features.market.VenderCommand(marketService));
+        }
         getLogger().info("EconomiaPlugin habilitado.");
     }
 

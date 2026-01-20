@@ -117,4 +117,44 @@ public final class Messages {
     public static void send(Player player, Component message) {
         player.sendMessage(prefix().append(message));
     }
+
+    /**
+     * Mensagem em caixa bonita (para anúncios e destaques).
+     */
+    public static void box(Player player, String title, String... lines) {
+        player.sendMessage(Component.empty());
+        player.sendMessage(Component.text("╔══════════════════════════════════╗", PRIMARY));
+        player.sendMessage(Component.text("║  ", PRIMARY)
+                .append(Component.text("★ " + title + " ★", SECONDARY).decorate(TextDecoration.BOLD)));
+        player.sendMessage(Component.text("╠══════════════════════════════════╣", PRIMARY));
+        for (String line : lines) {
+            player.sendMessage(Component.text("║  ", PRIMARY)
+                    .append(Component.text(line, NamedTextColor.WHITE)));
+        }
+        player.sendMessage(Component.text("╚══════════════════════════════════╝", PRIMARY));
+        player.sendMessage(Component.empty());
+    }
+
+    /**
+     * Mensagem de item (para mercado/loja).
+     */
+    public static void item(Player player, String itemName, double price, String seller) {
+        player.sendMessage(prefix()
+                .append(Component.text("📦 ", TextColor.color(255, 215, 0)))
+                .append(Component.text(itemName, SECONDARY).decorate(TextDecoration.BOLD))
+                .append(Component.text(" por ", INFO))
+                .append(Component.text("$" + String.format("%.2f", price), SUCCESS).decorate(TextDecoration.BOLD))
+                .append(Component.text(" - " + seller, INFO)));
+    }
+
+    /**
+     * Mensagem de XP ganho.
+     */
+    public static void xp(Player player, int amount, String skill) {
+        player.sendMessage(prefix()
+                .append(Component.text("⭐ ", TextColor.color(138, 43, 226)))
+                .append(Component.text("+" + amount + " XP ", TextColor.color(138, 43, 226))
+                        .decorate(TextDecoration.BOLD))
+                .append(Component.text(skill, INFO)));
+    }
 }

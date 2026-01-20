@@ -52,6 +52,12 @@ commands:
   homes:
     description: Lista seus homes
     usage: /homes
+  vender:
+    description: Lista um item no mercado
+    usage: /vender <preco>
+  mercado:
+    description: Abre o mercado de jogadores
+    usage: /mercado
 permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.
