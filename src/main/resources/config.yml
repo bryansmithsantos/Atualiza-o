@@ -33,3 +33,8 @@ company:
   share: 0.1
 logs:
   max: 30
+update:
+  repo: "bryansmithsantos/Atualiza-o"
+  asset: "Blinded.jar"
+  save-as: "Blinded.jar"
+  direct-url: ""

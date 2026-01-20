@@ -28,6 +28,8 @@ import com.example.economia.features.shop.ShopService;
 import com.example.economia.features.tax.TaxService;
 import com.example.economia.features.upgrades.UpgradesService;
 import com.example.economia.features.vault.VaultService;
+import com.example.economia.features.update.UpdateCommand;
+import com.example.economia.features.update.UpdateService;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
@@ -48,6 +50,7 @@ public final class EconomiaPlugin extends JavaPlugin {
     private FinesService finesService;
     private LogService logService;
     private TaxService taxService;
+    private UpdateService updateService;
 
     @Override
     public void onEnable() {
@@ -78,6 +81,7 @@ public final class EconomiaPlugin extends JavaPlugin {
         logService = new LogService(this);
         logService.load();
         taxService = new TaxService(this);
+        updateService = new UpdateService(this);
 
         workService = new WorkService(this, jobsService, economyService, upgradesService, missionsService, taxService, companyService, logService);
         shopService = new ShopService(this);
@@ -111,6 +115,9 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (getCommand("multa") != null) {
             getCommand("multa").setExecutor(new FinesCommand(finesService, logService));
+        }
+        if (getCommand("blinded") != null) {
+            getCommand("blinded").setExecutor(new UpdateCommand(updateService));
         }
         getLogger().info("EconomiaPlugin habilitado.");
     }

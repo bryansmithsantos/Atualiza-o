@@ -26,6 +26,9 @@ commands:
 	multa:
 		description: Gerenciar multas (admin)
 		usage: /multa add <jogador> <valor> <motivo>
+	blinded:
+		description: Atualizações do plugin
+		usage: /blinded <check|download>
 permissions:
 	blinded.admin:
 		description: Permite administrar o saldo dos jogadores.
