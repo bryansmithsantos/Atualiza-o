@@ -6,30 +6,30 @@ author: "crazy"
 description: "Plugin de economia com menus visuais e integração Bedrock (Geyser/Floodgate)."
 softdepend: [Geyser-Spigot, floodgate]
 commands:
-	money:
-		description: Comandos de economia
-		aliases: [saldo, coins]
-		usage: /money <saldo|pay|set|add|take>
-	painel:
-		description: Abre o painel principal
-		aliases: [menu]
-		usage: /painel
-	login:
-		description: Abre o painel de login
-		usage: /login
-	register:
-		description: Abre o painel de registro
-		usage: /register
-	loja:
-		description: Abre a loja do servidor
-		usage: /loja
-	multa:
-		description: Gerenciar multas (admin)
-		usage: /multa add <jogador> <valor> <motivo>
-	blinded:
-		description: Atualizações do plugin
-		usage: /blinded <check|download>
+  money:
+    description: Comandos de economia
+    aliases: [saldo, coins]
+    usage: /money <saldo|pay|set|add|take>
+  painel:
+    description: Abre o painel principal
+    aliases: [menu]
+    usage: /painel
+  login:
+    description: Abre o painel de login
+    usage: /login
+  register:
+    description: Abre o painel de registro
+    usage: /register
+  loja:
+    description: Abre a loja do servidor
+    usage: /loja
+  multa:
+    description: Gerenciar multas (admin)
+    usage: /multa add <jogador> <valor> <motivo>
+  blinded:
+    description: Atualizacoes do plugin
+    usage: /blinded <check|download>
 permissions:
-	blinded.admin:
-		description: Permite administrar o saldo dos jogadores.
-		default: op
+  blinded.admin:
+    description: Permite administrar o saldo dos jogadores.
+    default: op
