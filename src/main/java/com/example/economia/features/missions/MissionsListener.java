@@ -3,7 +3,6 @@ package com.example.economia.features.missions;
 import java.util.Set;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Animals;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
