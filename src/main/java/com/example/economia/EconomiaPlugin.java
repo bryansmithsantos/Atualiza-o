@@ -189,6 +189,10 @@ public final class EconomiaPlugin extends JavaPlugin {
                 return true;
             });
         }
+        if (getCommand("venda") != null) {
+            getCommand("venda").setExecutor(
+                    new com.example.economia.features.commands.VendaCommand(economyService, missionsService));
+        }
         getLogger().info("EconomiaPlugin habilitado.");
     }
 

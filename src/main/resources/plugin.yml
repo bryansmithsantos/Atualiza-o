@@ -62,6 +62,10 @@ commands:
     description: Abre a loja VIP do servidor
     usage: /shopvip
     aliases: [lojavip, servershop]
+  venda:
+    description: Vende o item na mão
+    usage: /venda
+    aliases: [sell, vendermao]
 permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.

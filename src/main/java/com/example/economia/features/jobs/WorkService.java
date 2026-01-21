@@ -64,7 +64,8 @@ public final class WorkService {
         missionsService.recordWork(player.getUniqueId());
         missionsService.recordEarn(player.getUniqueId(), playerCut);
         jobsService.addXp(player, job.id(), getXpPerWork());
-        logService.add(player.getUniqueId(), "Trabalho +" + economyService.getCurrencySymbol() + String.format("%.2f", playerCut));
+        logService.add(player.getUniqueId(),
+                "Trabalho +" + economyService.getCurrencySymbol() + String.format("%.2f", playerCut));
         lastWork.put(player.getUniqueId(), now);
         return new WorkResult(true, 0, reward);
     }
@@ -73,7 +74,8 @@ public final class WorkService {
         double base = job.basePay() * getMultiplier();
         double salary = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.SALARY);
         double bonus = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.JOB_BONUS);
-        return base * salary * bonus;
+        // Fix floating-point precision
+        return Math.round(base * salary * bonus * 100.0) / 100.0;
     }
 
     public long getCooldownSeconds(Player player) {

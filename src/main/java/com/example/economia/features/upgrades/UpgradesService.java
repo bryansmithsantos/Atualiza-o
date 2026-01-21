@@ -65,7 +65,8 @@ public final class UpgradesService {
     public double getMultiplier(UUID uuid, UpgradeType type) {
         int level = getLevel(uuid, type);
         double step = plugin.getConfig().getDouble("upgrades." + type.name().toLowerCase() + ".step", 0.05);
-        return 1.0 + (level * step);
+        // Fix floating-point precision
+        return Math.round((1.0 + (level * step)) * 1000.0) / 1000.0;
     }
 
     public double getCost(UUID uuid, UpgradeType type) {

@@ -87,11 +87,13 @@ public final class ScoreboardService {
         String line6 = entry("  ▪ Rank: ", TEXT, "");
         String line7 = entry("  ▪ Saldo: ", TEXT, "");
         String line8 = entry("  ▪ Plataforma: ", ACCENT, "");
-        String line9 = entry("", DARK, "");
-        String line10 = entry("", DARK, "§m------------------");
+        String line9 = entry("📍 ", SECONDARY, "Local:");
+        String line10 = entry("  ▪ Coords: ", TEXT, "");
+        String line11 = entry("", DARK, "§m------------------");
 
-        setScore(objective, line10, 10);
-        setScore(objective, line9, 9);
+        setScore(objective, line11, 11);
+        setScore(objective, line9, 10);
+        setScore(objective, line10, 9);
         setScore(objective, line5, 8);
         setScore(objective, line6, 7);
         setScore(objective, line7, 6);
@@ -107,6 +109,7 @@ public final class ScoreboardService {
         createTeam(board, "online", line2, " " + Bukkit.getOnlinePlayers().size());
         createTeam(board, "ping", line3, " " + player.getPing() + "ms");
         createTeam(board, "platform", line8, formatPlatform(player));
+        createTeam(board, "coords", line10, formatCoords(player));
 
         player.setScoreboard(board);
         scoreboards.put(player.getUniqueId(), board);
@@ -138,6 +141,7 @@ public final class ScoreboardService {
             updateTeam(board, "online", " " + Bukkit.getOnlinePlayers().size());
             updateTeam(board, "ping", " " + player.getPing() + "ms");
             updateTeam(board, "platform", formatPlatform(player));
+            updateTeam(board, "coords", formatCoords(player));
         }
     }
 
@@ -158,6 +162,13 @@ public final class ScoreboardService {
         if (bedrockSupport == null || !bedrockSupport.isAvailable())
             return " Java";
         return bedrockSupport.isBedrock(player) ? " Bedrock" : " Java";
+    }
+
+    private String formatCoords(Player player) {
+        int x = player.getLocation().getBlockX();
+        int y = player.getLocation().getBlockY();
+        int z = player.getLocation().getBlockZ();
+        return " " + x + ", " + y + ", " + z;
     }
 
     private String getRanking(Player player) {
