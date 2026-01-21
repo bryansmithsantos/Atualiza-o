@@ -75,6 +75,18 @@ public class ServerShopGui implements Listener {
         inv.setItem(34, createShopItem(Material.BEACON, "§b§lBeacon Completo", 800000,
                 "§7Com todos os efeitos!", "§7Pronto para usar"));
 
+        // === SPAWNERS & EGGS ===
+        inv.setItem(37, createShopItem(Material.SPAWNER, "§4§lSpawner de Zumbi", 500000,
+                "§7Spawner funcional!", "§cGera zumbis"));
+        inv.setItem(38, createShopItem(Material.SPAWNER, "§2§lSpawner de Esqueleto", 600000,
+                "§7Spawner funcional!", "§7Gera esqueletos"));
+        inv.setItem(39, createShopItem(Material.SPAWNER, "§8§lSpawner de Aranha", 450000,
+                "§7Spawner funcional!", "§8Gera aranhas"));
+        inv.setItem(40, createShopItem(Material.VILLAGER_SPAWN_EGG, "§a§lOvo de Villager x5", 300000,
+                "§7Crie sua vila!", "§a5 villagers"));
+        inv.setItem(41, createShopItem(Material.IRON_GOLEM_SPAWN_EGG, "§f§lOvo de Iron Golem x2", 400000,
+                "§7Proteção máxima!", "§72 golems"));
+
         // === VOLTAR ===
         inv.setItem(49, GuiUtils.item(Material.BARRIER, "§cVoltar", "§7Retornar ao painel"));
 

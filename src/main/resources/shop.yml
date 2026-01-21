@@ -99,3 +99,8 @@ items:
     material: "COPPER_INGOT"
     buy: 16
     sell: 6
+  saddle:
+    name: "Sela"
+    material: "SADDLE"
+    buy: 10
+    sell: 5

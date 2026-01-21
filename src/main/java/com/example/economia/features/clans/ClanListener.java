@@ -9,37 +9,51 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.example.economia.features.messages.Messages;
+import com.example.economia.features.tags.TagService;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class ClanListener implements Listener {
 
     private final ClanService clanService;
+    private TagService tagService;
 
     public ClanListener(ClanService clanService) {
         this.clanService = clanService;
+    }
+
+    public void setTagService(TagService tagService) {
+        this.tagService = tagService;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
         Clan clan = clanService.getClan(player.getUniqueId());
+        String serverTag = tagService != null ? tagService.getFormattedTag(player) : "";
 
-        if (clan != null) {
-            event.renderer((source, sourceDisplayName, message, viewer) -> Component
-                    .text("[" + clan.getTag() + "] ", NamedTextColor.GRAY)
+        event.renderer((source, sourceDisplayName, message, viewer) -> {
+            Component prefix = Component.empty();
+
+            // Add server tag first
+            if (!serverTag.isEmpty()) {
+                prefix = prefix.append(LegacyComponentSerializer.legacySection().deserialize(serverTag));
+            }
+
+            // Add clan tag
+            if (clan != null) {
+                prefix = prefix.append(Component.text("[" + clan.getTag() + "] ", NamedTextColor.GRAY));
+            }
+
+            return prefix
                     .append(sourceDisplayName)
                     .append(Component.text(": ", NamedTextColor.GRAY))
-                    .append(message));
-        }
+                    .append(message);
+        });
     }
-
-    // Usando formatação de chat mais compatível com Paper moderno
-    // Mas para garantir que a tag apareça, vamos usar uma abordagem de alterar o
-    // display name temporariamente ou usar Team/Scoreboard
-    // Vamos usar a abordagem de Team para TAB e DisplayName para Chat
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
@@ -48,15 +62,24 @@ public class ClanListener implements Listener {
 
     public void updateTabAndTag(Player player) {
         Clan clan = clanService.getClan(player.getUniqueId());
-        if (clan != null) {
-            Component tabName = Component.text("[" + clan.getTag() + "] ", NamedTextColor.GRAY)
-                    .append(Component.text(player.getName(), NamedTextColor.WHITE));
-            player.playerListName(tabName);
-            player.displayName(tabName); // Atualiza também o display name para o chat pegar
-        } else {
-            player.playerListName(Component.text(player.getName()));
-            player.displayName(Component.text(player.getName()));
+        String serverTag = tagService != null ? tagService.getFormattedTag(player) : "";
+
+        Component tabName = Component.empty();
+
+        // Server tag
+        if (!serverTag.isEmpty()) {
+            tabName = tabName.append(LegacyComponentSerializer.legacySection().deserialize(serverTag));
         }
+
+        // Clan tag
+        if (clan != null) {
+            tabName = tabName.append(Component.text("[" + clan.getTag() + "] ", NamedTextColor.GRAY));
+        }
+
+        tabName = tabName.append(Component.text(player.getName(), NamedTextColor.WHITE));
+
+        player.playerListName(tabName);
+        player.displayName(tabName);
     }
 
     @EventHandler(priority = EventPriority.LOW)

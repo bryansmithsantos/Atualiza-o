@@ -66,6 +66,18 @@ commands:
     description: Vende o item na mão
     usage: /venda
     aliases: [sell, vendermao]
+  upgrade:
+    description: Evolui o item na mão (gasta XP)
+    usage: /upgrade
+    aliases: [melhorar, upar]
+  evoluir:
+    description: Transforma diamante em netherite (gasta 1 level XP)
+    usage: /evoluir
+    aliases: [evolve, netherite]
+  tag:
+    description: Define tag de um jogador (admin)
+    usage: /tag <player> <tag>
+    permission: blinded.admin
 permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.
@@ -73,3 +85,30 @@ permissions:
   blinded.treefeller:
     description: Permite cortar arvore inteira (agachado + machado).
     default: true
+  blinded.tag.vip:
+    description: Tag VIP
+    default: false
+  blinded.tag.mvp:
+    description: Tag MVP
+    default: false
+  blinded.tag.elite:
+    description: Tag Elite
+    default: false
+  blinded.tag.legend:
+    description: Tag Lenda
+    default: false
+  blinded.tag.admin:
+    description: Tag Admin
+    default: op
+  blinded.tag.mod:
+    description: Tag Mod
+    default: false
+  blinded.tag.helper:
+    description: Tag Helper
+    default: false
+  blinded.tag.builder:
+    description: Tag Builder
+    default: false
+  blinded.tag.youtuber:
+    description: Tag Youtuber
+    default: false

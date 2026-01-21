@@ -72,10 +72,11 @@ public final class WorkService {
 
     public double getReward(Player player, Job job) {
         double base = job.basePay() * getMultiplier();
-        double salary = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.SALARY);
-        double bonus = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.JOB_BONUS);
-        // Fix floating-point precision
-        return Math.round(base * salary * bonus * 100.0) / 100.0;
+        double salaryBonus = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.SALARY); // Now returns
+                                                                                                      // flat bonus
+        double bonusMult = upgradesService.getMultiplier(player.getUniqueId(), UpgradeType.JOB_BONUS);
+        // Base + salary bonus, then apply job bonus multiplier
+        return Math.round((base + salaryBonus) * bonusMult * 100.0) / 100.0;
     }
 
     public long getCooldownSeconds(Player player) {

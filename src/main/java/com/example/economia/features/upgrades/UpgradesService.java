@@ -64,8 +64,13 @@ public final class UpgradesService {
 
     public double getMultiplier(UUID uuid, UpgradeType type) {
         int level = getLevel(uuid, type);
+
+        if (type == UpgradeType.SALARY) {
+            // Return flat bonus amount (level * 100)
+            return level * 100.0;
+        }
+
         double step = plugin.getConfig().getDouble("upgrades." + type.name().toLowerCase() + ".step", 0.05);
-        // Fix floating-point precision
         return Math.round((1.0 + (level * step)) * 1000.0) / 1000.0;
     }
 

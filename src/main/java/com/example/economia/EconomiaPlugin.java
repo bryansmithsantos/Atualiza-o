@@ -39,6 +39,9 @@ import com.example.economia.features.clans.ClanGui;
 import com.example.economia.features.gui.AdminPanelGui;
 import com.example.economia.features.homes.HomeService;
 import com.example.economia.features.homes.HomeCommand;
+import com.example.economia.features.tags.TagService;
+import com.example.economia.features.tags.TagCommand;
+import com.example.economia.features.gravestone.GravestoneListener;
 
 public final class EconomiaPlugin extends JavaPlugin {
 
@@ -125,9 +128,16 @@ public final class EconomiaPlugin extends JavaPlugin {
                 this);
         getServer().getPluginManager().registerEvents(new GeneratorListener(generatorService, this), this);
         getServer().getPluginManager().registerEvents(new GeneratorsGui(generatorService, economyService), this);
-        getServer().getPluginManager().registerEvents(new ClanListener(clanService), this);
+        ClanListener clanListener = new ClanListener(clanService);
+        getServer().getPluginManager().registerEvents(clanListener, this);
         getServer().getPluginManager().registerEvents(new ClanGui(clanService), this);
         getServer().getPluginManager().registerEvents(new AdminPanelGui(), this);
+        getServer().getPluginManager().registerEvents(new GravestoneListener(this), this);
+
+        // Tag Service
+        TagService tagService = new TagService(this);
+        tagService.load();
+        clanListener.setTagService(tagService);
         getServer().getPluginManager()
                 .registerEvents(new com.example.economia.features.gui.ServerShopGui(economyService), this);
         if (getCommand("money") != null) {
@@ -192,6 +202,15 @@ public final class EconomiaPlugin extends JavaPlugin {
         if (getCommand("venda") != null) {
             getCommand("venda").setExecutor(
                     new com.example.economia.features.commands.VendaCommand(economyService, missionsService));
+        }
+        if (getCommand("upgrade") != null) {
+            getCommand("upgrade").setExecutor(new com.example.economia.features.commands.UpgradeCommand());
+        }
+        if (getCommand("evoluir") != null) {
+            getCommand("evoluir").setExecutor(new com.example.economia.features.commands.EvolveCommand());
+        }
+        if (getCommand("tag") != null) {
+            getCommand("tag").setExecutor(new TagCommand(tagService));
         }
         getLogger().info("EconomiaPlugin habilitado.");
     }
