@@ -101,7 +101,6 @@ public class GeneratorService {
     private boolean generateItem(Generator gen) {
         Block block = gen.getLocation().getBlock();
         if (block.getType() != gen.getType().getBlockMaterial()) {
-            // Bloco foi quebrado ou mudado mas não removido da lista?
             return false;
         }
 
@@ -115,7 +114,6 @@ public class GeneratorService {
         ItemStack item = new ItemStack(gen.getType().getDropMaterial());
 
         if (inv.firstEmpty() == -1) {
-            // Inventário cheio, verificar se dá pra stackar
             for (ItemStack is : inv.getContents()) {
                 if (is != null && is.isSimilar(item) && is.getAmount() < is.getMaxStackSize()) {
                     inv.addItem(item);
@@ -146,12 +144,10 @@ public class GeneratorService {
     }
 
     private void playEffect(Location loc) {
-        // Partículas leves para não lagar
         loc.getWorld().spawnParticle(org.bukkit.Particle.COMPOSTER, loc.clone().add(0.5, 1, 0.5), 3, 0.2, 0.2, 0.2, 0);
     }
 
     public void createGenerator(Player player, GeneratorType type) {
-        // Dar o item para o jogador colocar
         ItemStack item = new ItemStack(type.getBlockMaterial());
         org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
         meta.displayName(
@@ -161,13 +157,8 @@ public class GeneratorService {
         lore.add(Component.text("Coloque ao lado de um baú!", NamedTextColor.YELLOW));
         lore.add(Component.text("Gera: ", NamedTextColor.GRAY)
                 .append(Component.text(type.getDropMaterial().name(), type.getColor())));
-        // Guardar o tipo no NBT/Lore escondida para identificar ao colocar
-        // (simplificado via lore aqui)
-        // Para uma solução robusta usaria PersistentDataContainer, mas Lore serve por
-        // enquanto e é visível
 
         meta.lore(lore);
-        // Marcador para identificar que é um gerador
         meta.getPersistentDataContainer().set(
                 new org.bukkit.NamespacedKey(plugin, "generator_type"),
                 org.bukkit.persistence.PersistentDataType.STRING,

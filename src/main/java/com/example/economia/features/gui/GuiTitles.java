@@ -24,6 +24,7 @@ public final class GuiTitles {
     public static final String GENERATORS_TEXT = "Blinded - Geradores";
     public static final String CLAN_TEXT = "Blinded - Clan";
     public static final String ADMIN_PANEL_TEXT = "Blinded - Admin";
+    public static final String SERVER_SHOP_TEXT = "Blinded - Shop VIP";
 
     public static final Component AUTH = Component.text(AUTH_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component CLAN = Component.text(CLAN_TEXT, NamedTextColor.DARK_GREEN);
@@ -44,6 +45,7 @@ public final class GuiTitles {
     public static final Component LEADERBOARDS = Component.text(LEADERBOARDS_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component LOGS = Component.text(LOGS_TEXT, NamedTextColor.DARK_GREEN);
     public static final Component GENERATORS = Component.text(GENERATORS_TEXT, NamedTextColor.DARK_GREEN);
+    public static final Component SERVER_SHOP = Component.text(SERVER_SHOP_TEXT, NamedTextColor.GOLD);
 
     private GuiTitles() {
     }

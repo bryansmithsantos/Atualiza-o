@@ -128,6 +128,8 @@ public final class EconomiaPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ClanListener(clanService), this);
         getServer().getPluginManager().registerEvents(new ClanGui(clanService), this);
         getServer().getPluginManager().registerEvents(new AdminPanelGui(), this);
+        getServer().getPluginManager()
+                .registerEvents(new com.example.economia.features.gui.ServerShopGui(economyService), this);
         if (getCommand("money") != null) {
             MoneyCommand moneyCommand = new MoneyCommand(economyService, authService, taxService, logService);
             getCommand("money").setExecutor(moneyCommand);
@@ -178,6 +180,14 @@ public final class EconomiaPlugin extends JavaPlugin {
         }
         if (getCommand("vender") != null) {
             getCommand("vender").setExecutor(new com.example.economia.features.market.VenderCommand(marketService));
+        }
+        if (getCommand("shopvip") != null) {
+            getCommand("shopvip").setExecutor((sender, cmd, label, args) -> {
+                if (sender instanceof org.bukkit.entity.Player player) {
+                    com.example.economia.features.gui.ServerShopGui.open(player);
+                }
+                return true;
+            });
         }
         getLogger().info("EconomiaPlugin habilitado.");
     }
