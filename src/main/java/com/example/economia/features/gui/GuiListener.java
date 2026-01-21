@@ -460,22 +460,66 @@ public final class GuiListener implements Listener {
     }
 
     private void handleMissionsClick(Player player, ItemStack item) {
-        if (item.getType() == Material.BARRIER) {
+        Material type = item.getType();
+
+        // Back button
+        if (type == Material.BARRIER) {
             MainMenuGui.open(player, economyService, jobsService, workService);
             return;
         }
-        String title = PlainTextComponentSerializer.plainText().serialize(item.getItemMeta().displayName());
-        for (Mission mission : missionsService.getMissions()) {
-            if (mission.title().equalsIgnoreCase(title)) {
-                if (!missionsService.claim(player.getUniqueId(), mission)) {
-                    player.sendMessage("Missão incompleta.");
+
+        // Pagination arrows
+        if (type == Material.ARROW) {
+            String name = "";
+            if (item.getItemMeta() != null && item.getItemMeta().displayName() != null) {
+                name = PlainTextComponentSerializer.plainText().serialize(item.getItemMeta().displayName());
+            }
+            int currentPage = MissionsGui.getPlayerPage(player.getUniqueId());
+            if (name.contains("Anterior")) {
+                MissionsGui.open(player, economyService, missionsService, currentPage - 1);
+            } else if (name.contains("Próxima")) {
+                MissionsGui.open(player, economyService, missionsService, currentPage + 1);
+            }
+            return;
+        }
+
+        // Mission item (dyes)
+        if (type == Material.LIME_DYE || type == Material.YELLOW_DYE || type == Material.GRAY_DYE) {
+            // Get mission by matching title from display name (without color codes)
+            if (item.getItemMeta() == null || item.getItemMeta().displayName() == null)
+                return;
+
+            String displayName = PlainTextComponentSerializer.plainText().serialize(item.getItemMeta().displayName());
+
+            // Remove color code prefixes that might remain
+            displayName = displayName.replaceAll("^[§&][a-fA-F0-9klmnor]", "").trim();
+
+            for (Mission mission : missionsService.getMissions()) {
+                if (displayName.contains(mission.title()) || mission.title().contains(displayName) ||
+                        displayName.equalsIgnoreCase(mission.title())) {
+
+                    // Check if already claimed
+                    if (type == Material.LIME_DYE) {
+                        player.sendMessage("§7Esta missão já foi coletada!");
+                        return;
+                    }
+
+                    // Try to claim
+                    if (!missionsService.claim(player.getUniqueId(), mission)) {
+                        player.sendMessage("§cMissão ainda não completa!");
+                        return;
+                    }
+
+                    economyService.addBalance(player.getUniqueId(), mission.reward());
+                    logService.add(player.getUniqueId(),
+                            "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
+                    player.sendMessage("§a✓ Missão concluída! +" + economyService.getCurrencySymbol() +
+                            String.format("%.0f", mission.reward()));
+                    player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.5f);
+                    MissionsGui.open(player, economyService, missionsService,
+                            MissionsGui.getPlayerPage(player.getUniqueId()));
                     return;
                 }
-                economyService.addBalance(player.getUniqueId(), mission.reward());
-                logService.add(player.getUniqueId(),
-                        "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
-                MissionsGui.open(player, economyService, missionsService);
-                return;
             }
         }
     }
