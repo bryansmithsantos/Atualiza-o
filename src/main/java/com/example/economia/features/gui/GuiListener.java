@@ -365,6 +365,38 @@ public final class GuiListener implements Listener {
             }
             logService.add(player.getUniqueId(), "Depósito banco 200");
             BankGui.open(player, economyService, bankService);
+        } else if (type == Material.DIAMOND_BLOCK) {
+            // Deposit All Logic
+            double wallet = economyService.getBalance(player);
+            double remainingLimit = bankService.getRemainingLimit(player.getUniqueId());
+
+            if (wallet <= 0) {
+                player.sendMessage("§cVocê não tem dinheiro na carteira.");
+                return;
+            }
+
+            double toDeposit = Math.min(wallet, remainingLimit);
+
+            if (toDeposit <= 0) {
+                player.sendMessage("§cLimite diário atingido.");
+                return;
+            }
+
+            if (economyService.removeBalance(player.getUniqueId(), toDeposit)) {
+                if (bankService.deposit(player.getUniqueId(), toDeposit)) {
+                    logService.add(player.getUniqueId(), "Depósito banco (Tudo) " + toDeposit);
+                    player.sendMessage(
+                            "§aDepositado: " + economyService.getCurrencySymbol() + String.format("%.2f", toDeposit));
+                    if (wallet > toDeposit) {
+                        player.sendMessage("§e(Limitado pelo limite diário)");
+                    }
+                } else {
+                    // Should not happen if logic is correct, but refund just in case
+                    economyService.addBalance(player.getUniqueId(), toDeposit);
+                    player.sendMessage("§cErro ao depositar.");
+                }
+            }
+            BankGui.open(player, economyService, bankService);
         } else if (type == Material.GOLD_NUGGET) {
             if (!bankService.withdraw(player.getUniqueId(), 50)) {
                 player.sendMessage("Saldo bancário insuficiente.");

@@ -67,6 +67,11 @@ public class AdminPanelGui implements Listener {
         inv.setItem(25, GuiUtils.item(Material.IRON_SWORD, "§cGameMode",
                 "§7Alternar Survival/Creative"));
 
+        inv.setItem(32, GuiUtils.item(Material.TNT, "§cTirar Dinheiro",
+                "§7/money take <player> <qtd>"));
+        inv.setItem(33, GuiUtils.item(Material.SKELETON_SKULL, "§cTirar XP",
+                "§7/xp take <player> <amount>"));
+
         // === UTILITIES (Row 4) ===
         inv.setItem(28, GuiUtils.item(Material.COMPASS, "§fWorld Spawn",
                 "§7Teleportar ao spawn."));
@@ -159,6 +164,14 @@ public class AdminPanelGui implements Listener {
             case EXPERIENCE_BOTTLE -> {
                 player.closeInventory();
                 Messages.info(player, "Use: /xp give <player> <amount>");
+            }
+            case TNT -> {
+                player.closeInventory();
+                Messages.info(player, "Use: /money take <player> <valor>");
+            }
+            case SKELETON_SKULL -> {
+                player.closeInventory();
+                Messages.info(player, "Use: /xp take <player> <amount> (ou levels)");
             }
             case IRON_SWORD -> {
                 if (player.getGameMode() == GameMode.SURVIVAL) {
