@@ -44,6 +44,10 @@ public class DungeonSession {
     private double totalReward = 0;
     private final List<Location> arenaBlocks = new ArrayList<>();
 
+    // Arena Settings
+    private static final int ARENA_SIZE = 80;
+    private static final int ARENA_HEIGHT = 8;
+
     public DungeonSession(Plugin plugin, DungeonService dungeonService, Player owner, DungeonDifficulty difficulty) {
         this.plugin = plugin;
         this.dungeonService = dungeonService;
@@ -93,7 +97,7 @@ public class DungeonSession {
         }
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
-                if (entity.getLocation().distance(arenaCenter) < 60 && !(entity instanceof Player)) {
+                if (entity.getLocation().distance(arenaCenter) < (ARENA_SIZE + 10) && !(entity instanceof Player)) {
                     entity.remove();
                 }
             }
@@ -135,23 +139,23 @@ public class DungeonSession {
         int baseZ = (int) (Math.random() * 10000) - 5000;
         int baseY = 300;
 
-        arenaCenter = new Location(world, baseX + 25, baseY + 1, baseZ + 25);
+        arenaCenter = new Location(world, baseX + (ARENA_SIZE / 2), baseY + 1, baseZ + (ARENA_SIZE / 2));
 
-        for (int x = 0; x < 50; x++) {
-            for (int z = 0; z < 50; z++) {
+        for (int x = 0; x < ARENA_SIZE; x++) {
+            for (int z = 0; z < ARENA_SIZE; z++) {
                 // Floor
                 Block floor = world.getBlockAt(baseX + x, baseY, baseZ + z);
                 floor.setType(Material.DEEPSLATE_BRICKS);
                 arenaBlocks.add(floor.getLocation());
 
                 // Ceiling
-                Block ceiling = world.getBlockAt(baseX + x, baseY + 6, baseZ + z);
+                Block ceiling = world.getBlockAt(baseX + x, baseY + ARENA_HEIGHT, baseZ + z);
                 ceiling.setType(Material.TINTED_GLASS);
                 arenaBlocks.add(ceiling.getLocation());
 
                 // Walls
-                if (x == 0 || x == 49 || z == 0 || z == 49) {
-                    for (int y = 1; y <= 5; y++) {
+                if (x == 0 || x == (ARENA_SIZE - 1) || z == 0 || z == (ARENA_SIZE - 1)) {
+                    for (int y = 1; y < ARENA_HEIGHT; y++) {
                         Block wall = world.getBlockAt(baseX + x, baseY + y, baseZ + z);
                         wall.setType(Material.DEEPSLATE_BRICK_WALL);
                         arenaBlocks.add(wall.getLocation());
@@ -161,8 +165,8 @@ public class DungeonSession {
         }
 
         // Lighting
-        for (int x = 5; x < 50; x += 10) {
-            for (int z = 5; z < 50; z += 10) {
+        for (int x = 5; x < ARENA_SIZE; x += 15) {
+            for (int z = 5; z < ARENA_SIZE; z += 15) {
                 Block torch = world.getBlockAt(baseX + x, baseY + 1, baseZ + z);
                 torch.setType(Material.LANTERN);
                 arenaBlocks.add(torch.getLocation());
@@ -179,23 +183,34 @@ public class DungeonSession {
                     return;
                 }
 
-                if (mobsRemaining > 0 && !bossPhase) {
-                    int actualMobs = 0;
-                    for (Entity entity : arenaCenter.getWorld().getNearbyEntities(arenaCenter, 50, 20, 50)) {
-                        if (entity instanceof LivingEntity && !(entity instanceof Player)) {
-                            actualMobs++;
+                int foundMobs = 0;
+                for (Entity entity : arenaCenter.getWorld().getNearbyEntities(arenaCenter, ARENA_SIZE + 10,
+                        ARENA_HEIGHT + 10, ARENA_SIZE + 10)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        foundMobs++;
+
+                        // Teleport back if too far or outside Y range
+                        double dist = entity.getLocation().distance(arenaCenter);
+                        double yDist = Math.abs(entity.getLocation().getY() - arenaCenter.getY());
+
+                        if (dist > (ARENA_SIZE / 2 + 2) || yDist > (ARENA_HEIGHT - 1)) {
+                            entity.teleport(arenaCenter);
+                            if (entity instanceof Mob mob) {
+                                Player target = getRandomPlayer();
+                                if (target != null)
+                                    mob.setTarget(target);
+                            }
                         }
                     }
+                }
 
-                    if (actualMobs == 0) {
-                        // All mobs disappeared but wave didn't finish
-                        broadcastMessage("§8[Blinded] §7Anti-Bug: Detectado desaparecimento de mobs. Pulando onda...");
-                        mobsRemaining = 0;
-                        waveComplete();
-                    }
+                if (mobsRemaining > 0 && !bossPhase && foundMobs == 0) {
+                    broadcastMessage("§8[Blinded] §7Anti-Bug: Mobs sumiram da arena. Pulando onda...");
+                    mobsRemaining = 0;
+                    waveComplete();
                 }
             }
-        }.runTaskTimer(plugin, 100L, 100L).getTaskId(); // Every 5 seconds
+        }.runTaskTimer(plugin, 40L, 40L).getTaskId(); // Every 2 seconds
     }
 
     private void teleportPlayers() {
@@ -299,7 +314,7 @@ public class DungeonSession {
             broadcastMessage("§c§l" + getBossName() + "§c: §7\"Vocês ousam invadir meu domínio?!\"");
         }, 40L);
 
-        Location bossLoc = arenaCenter.clone().add(0, 0, 10);
+        Location bossLoc = arenaCenter.clone().add(0, 0, 15);
         boss = (IronGolem) arenaCenter.getWorld().spawnEntity(bossLoc, EntityType.IRON_GOLEM);
         boss.customName(LegacyComponentSerializer.legacySection().deserialize("§c§l" + getBossName()));
         boss.setCustomNameVisible(true);
@@ -556,7 +571,7 @@ public class DungeonSession {
         }
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
-                if (entity.getLocation().distance(arenaCenter) < 60 && !(entity instanceof Player)) {
+                if (entity.getLocation().distance(arenaCenter) < (ARENA_SIZE + 10) && !(entity instanceof Player)) {
                     entity.remove();
                 }
             }
@@ -571,8 +586,9 @@ public class DungeonSession {
     }
 
     private Location getRandomArenaLocation() {
-        double offsetX = Math.random() * 40 - 20;
-        double offsetZ = Math.random() * 40 - 20;
+        int half = ARENA_SIZE / 2;
+        double offsetX = Math.random() * (ARENA_SIZE - 6) - (half - 3);
+        double offsetZ = Math.random() * (ARENA_SIZE - 6) - (half - 3);
         return arenaCenter.clone().add(offsetX, 0, offsetZ);
     }
 
