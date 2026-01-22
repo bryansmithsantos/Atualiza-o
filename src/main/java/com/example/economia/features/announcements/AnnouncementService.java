@@ -23,19 +23,39 @@ public class AnnouncementService {
     }
 
     private void registerAnnouncements() {
-        add("§6§l⚡ NOVIDADE! §r§7Use §e/upgrade §7para evoluir seus itens com XP!");
-        add("§b§l✦ DICA! §r§7Use §e/evoluir §7para transformar diamante em netherite!");
-        add("§d§l★ ECONOMIA! §r§7Venda qualquer item com §e/venda §7- segure na mão!");
-        add("§a§l💰 BANCO! §r§7Clique em §e'Depositar Tudo' §7no banco para depositar rápido!");
-        add("§c§l☠ MORTE! §r§7Seus itens ficam em uma §elápide/baú §7quando você morre!");
-        add("§5§l⬆ MELHORIAS! §r§7Aumente seu §esalário §7em +$100 por nível!");
-        add("§e§l🏪 LOJA VIP! §r§7Compre §cspawners§7, §avillagers§7 e itens OP em §e/lojavip§7!");
-        add("§6§l🎯 MISSÕES! §r§7Complete missões diárias para ganhar recompensas!");
-        add("§b§l📍 COORDENADAS! §r§7Veja sua posição X, Y, Z no scoreboard!");
-        add("§a§l🏠 CASAS! §r§7Use §e/sethome §7para salvar e §e/home §7para teleportar!");
+        // === DUNGEONS ===
+        add("§4§l🏰 DUNGEONS! §r§7Enfrente mobs e bosses! Use §e/dungeon entrar§7!");
+        add("§c§l⚔ BOSS! §r§7Dungeons têm Iron Golems com poderes especiais!");
+        add("§6§l💰 RECOMPENSAS! §r§7Complete dungeons e ganhe até §e$3.000.000§7!");
+        add("§5§l👥 GRUPO! §r§7Entre na dungeon de alguém com §e/dungeon entrar <jogador>§7!");
+
+        // === CLÃS ===
+        add("§a§l✨ GLOW! §r§7Membros do seu clã §abrilham verde §7para você!");
         add("§d§l⚔ CLÃS! §r§7Crie seu clã com §e/clan criar <nome>§7!");
+
+        // === UPGRADES ===
+        add("§6§l⚡ UPGRADE! §r§7Use §e/upgrade §7para evoluir seus itens com XP!");
+        add("§b§l✦ NETHERITE! §r§7Use §e/evoluir §7para transformar diamante em netherite!");
+        add("§5§l⬆ SALÁRIO! §r§7Aumente seu salário em §e+$100 §7por nível!");
+
+        // === ECONOMIA ===
+        add("§d§l★ VENDA! §r§7Venda qualquer item com §e/venda §7- segure na mão!");
+        add("§a§l💰 BANCO! §r§7Clique em §e'Depositar Tudo' §7para depositar rápido!");
+        add("§e§l🏪 LOJA VIP! §r§7Compre §cspawners§7, §avillagers§7 em §e/lojavip§7!");
+
+        // === GAMEPLAY ===
+        add("§c§l☠ LÁPIDE! §r§7Seus itens ficam em um §ebaú §7quando você morre!");
+        add("§6§l🎯 MISSÕES! §r§7Complete missões diárias para ganhar recompensas!");
         add("§c§l🔥 GERADORES! §r§7Compre geradores de minério no §e/painel§7!");
-        add("§6§l💎 RANKS! §r§7Evolua seu rank no servidor para mais benefícios!");
+
+        // === TAGS ===
+        add("§e§l� TAGS! §r§7VIP, MVP, ELITE... Veja sua tag no chat!");
+
+        // === UTILIDADES ===
+        add("§b§l📍 COORDENADAS! §r§7Veja sua posição X, Y, Z no scoreboard!");
+        add("§a§l🏠 CASAS! §r§7Use §e/sethome §7e §e/home §7para teleportar!");
+
+        // === OUTROS ===
         add("§b§l📢 DISCORD! §r§7Entre no nosso Discord para novidades e suporte!");
     }
 
