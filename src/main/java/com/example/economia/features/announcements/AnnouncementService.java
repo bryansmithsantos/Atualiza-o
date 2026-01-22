@@ -26,7 +26,7 @@ public class AnnouncementService {
         // === DUNGEONS ===
         add("§4§l🏰 DUNGEONS! §r§7Enfrente mobs e bosses! Use §e/dungeon entrar§7!");
         add("§c§l⚔ BOSS! §r§7Dungeons têm Iron Golems com poderes especiais!");
-        add("§6§l💰 RECOMPENSAS! §r§7Complete dungeons e ganhe até §e$3.000.000§7!");
+        add("§6§l💰 RECOMPENSAS! §r§7Complete dungeons e ganhe até §e$20.000.000§7!");
         add("§5§l👥 GRUPO! §r§7Entre na dungeon de alguém com §e/dungeon entrar <jogador>§7!");
 
         // === CLÃS ===

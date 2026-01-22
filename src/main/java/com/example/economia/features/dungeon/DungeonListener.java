@@ -55,7 +55,8 @@ public class DungeonListener implements Listener {
                         if (entity instanceof IronGolem && entity.equals(session.getBoss())) {
                             // Boss killed
                             session.onBossKill();
-                            dungeonService.giveRewards(session, session.getDifficulty().getMaxReward() * 1.5);
+                            // Give extra reward for boss
+                            dungeonService.giveRewards(session, session.getDifficulty().getMaxReward() * 0.5);
                         } else if (entity instanceof LivingEntity && !(entity instanceof Player)) {
                             session.onMobKill();
                         }
@@ -75,7 +76,7 @@ public class DungeonListener implements Listener {
 
         if (session != null) {
             // Player left during dungeon
-            session.getPlayers().remove(player.getUniqueId());
+            session.removePlayer(player);
 
             if (session.getPlayers().isEmpty()) {
                 session.defeat();

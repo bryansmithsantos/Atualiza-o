@@ -31,7 +31,7 @@ public class DungeonService {
     private int spawnTaskId = -1;
     private int timeoutTaskId = -1;
 
-    private static final long COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
+    private static final long COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes (as requested)
 
     public DungeonService(Plugin plugin, EconomyService economyService) {
         this.plugin = plugin;
@@ -43,12 +43,12 @@ public class DungeonService {
     }
 
     public void startNaturalSpawnCycle() {
-        // Spawn dungeon every 15 minutes
+        // Spawn dungeon every 5 minutes (updated from 15)
         spawnTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
                 plugin,
                 this::spawnNaturalDungeon,
                 20 * 60, // First spawn after 1 minute
-                20 * 60 * 15 // Then every 15 minutes
+                20 * 60 * 5 // Then every 5 minutes
         );
     }
 

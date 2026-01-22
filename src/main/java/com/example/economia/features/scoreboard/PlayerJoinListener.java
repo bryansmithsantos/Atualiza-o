@@ -15,7 +15,7 @@ public final class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        scoreboardService.applyScoreboard(event.getPlayer());
+        scoreboardService.setupScoreboard(event.getPlayer());
     }
 
     @EventHandler

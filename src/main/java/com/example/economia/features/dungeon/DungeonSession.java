@@ -21,7 +21,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 
 public class DungeonSession {
@@ -51,6 +53,10 @@ public class DungeonSession {
 
     public void addPlayer(Player player) {
         players.add(player.getUniqueId());
+    }
+
+    public void removePlayer(Player player) {
+        players.remove(player.getUniqueId());
     }
 
     public boolean hasPlayer(UUID uuid) {
@@ -161,7 +167,11 @@ public class DungeonSession {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
                 p.teleport(arenaCenter);
-                p.sendMessage("§a§lVocê entrou na dungeon: " + difficulty.getColor() + difficulty.getName());
+                Component enterMsg = Component.text("★ ", NamedTextColor.GOLD)
+                        .append(Component.text("Você entrou na dungeon: ", NamedTextColor.GREEN))
+                        .append(LegacyComponentSerializer.legacySection()
+                                .deserialize(difficulty.getColor() + difficulty.getName()));
+                p.sendMessage(enterMsg);
             }
         }
     }
@@ -203,11 +213,27 @@ public class DungeonSession {
             Entity entity = arenaCenter.getWorld().spawnEntity(spawnLoc, type);
             if (entity instanceof LivingEntity living) {
                 living.setRemoveWhenFarAway(false);
-                // Make them target players
-                if (entity instanceof Mob mob) {
+                if (living instanceof Mob mob) {
+                    mob.setPersistent(true);
                     Player target = getRandomPlayer();
                     if (target != null) {
                         mob.setTarget(target);
+                    }
+                }
+
+                // Prevent burning with helmet (Button)
+                if (living.getEquipment() != null) {
+                    living.getEquipment().setHelmet(new org.bukkit.inventory.ItemStack(Material.STONE_BUTTON));
+                    // Armor scaling for high levels
+                    if (difficulty.ordinal() >= 5) {
+                        living.getEquipment()
+                                .setChestplate(new org.bukkit.inventory.ItemStack(Material.IRON_CHESTPLATE));
+                    }
+                    if (difficulty.ordinal() >= 8) {
+                        living.getEquipment()
+                                .setChestplate(new org.bukkit.inventory.ItemStack(Material.NETHERITE_CHESTPLATE));
+                        living.getEquipment()
+                                .setLeggings(new org.bukkit.inventory.ItemStack(Material.NETHERITE_LEGGINGS));
                     }
                 }
             }
@@ -225,12 +251,18 @@ public class DungeonSession {
                     EntityType.VINDICATOR };
             case NIVEL_5 -> new EntityType[] { EntityType.WITHER_SKELETON, EntityType.BLAZE, EntityType.EVOKER,
                     EntityType.RAVAGER };
+            case NIVEL_6, NIVEL_7 -> new EntityType[] { EntityType.WITHER_SKELETON, EntityType.VINDICATOR,
+                    EntityType.EVOKER, EntityType.ELDER_GUARDIAN };
+            case NIVEL_8, NIVEL_9 ->
+                new EntityType[] { EntityType.WITHER_SKELETON, EntityType.RAVAGER, EntityType.VEX, EntityType.WARDEN };
+            case NIVEL_10 ->
+                new EntityType[] { EntityType.WARDEN, EntityType.WITHER, EntityType.EVOKER, EntityType.RAVAGER };
         };
     }
 
     private void spawnBoss() {
         broadcastTitle("§4§lBOSS!", "§c" + getBossName());
-        broadcastMessage("§4☠ " + getBossName() + " §cappareceu!");
+        broadcastMessage("§4☠ " + getBossName() + " §capareceu!");
         playSound(org.bukkit.Sound.ENTITY_WITHER_SPAWN, 1f);
 
         // Boss message
@@ -240,8 +272,7 @@ public class DungeonSession {
 
         Location bossLoc = arenaCenter.clone().add(0, 0, 10);
         boss = (IronGolem) arenaCenter.getWorld().spawnEntity(bossLoc, EntityType.IRON_GOLEM);
-        boss.customName(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
-                .deserialize("§c§l" + getBossName()));
+        boss.customName(LegacyComponentSerializer.legacySection().deserialize("§c§l" + getBossName()));
         boss.setCustomNameVisible(true);
         boss.setRemoveWhenFarAway(false);
 
@@ -270,6 +301,11 @@ public class DungeonSession {
             case NIVEL_3 -> "Comandante das Trevas";
             case NIVEL_4 -> "Senhor da Morte";
             case NIVEL_5 -> "Destruidor Final";
+            case NIVEL_6 -> "Fantasma do Vazio";
+            case NIVEL_7 -> "Anomalia Espacial";
+            case NIVEL_8 -> "Titã de Sangue";
+            case NIVEL_9 -> "Deus da Peste";
+            case NIVEL_10 -> "O Próprio Caos";
         };
     }
 
@@ -313,14 +349,16 @@ public class DungeonSession {
         if (boss == null || !active)
             return;
 
-        int power = (int) (Math.random() * 5);
-
-        switch (power) {
-            case 0 -> fireballAttack();
-            case 1 -> summonMinions();
-            case 2 -> blindnessAttack();
-            case 3 -> lightningAttack();
-            case 4 -> fireRain();
+        int powerCount = difficulty.ordinal() >= 5 ? 2 : 1;
+        for (int i = 0; i < powerCount; i++) {
+            int power = (int) (Math.random() * 5);
+            switch (power) {
+                case 0 -> fireballAttack();
+                case 1 -> summonMinions();
+                case 2 -> blindnessAttack();
+                case 3 -> lightningAttack();
+                case 4 -> fireRain();
+            }
         }
     }
 
@@ -422,6 +460,15 @@ public class DungeonSession {
         broadcastMessage("§a✓ Onda " + currentWave + " completa! §e+" + formatMoney(difficulty.getRewardPerWave()));
         playSound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
 
+        // Global announcement for progress
+        if (currentWave > 1) {
+            String ownerName = Bukkit.getPlayer(owner) != null ? Bukkit.getPlayer(owner).getName() : "Equipe";
+            Bukkit.getServer().sendMessage(Component.text("⚔ ", NamedTextColor.GOLD)
+                    .append(Component.text(ownerName + " e sua equipe", NamedTextColor.YELLOW))
+                    .append(Component.text(" completaram a onda " + currentWave + " da dungeon!",
+                            NamedTextColor.GRAY)));
+        }
+
         // 5 second break
         broadcastTitle("§a§lOnda Completa!", "§7Próxima em 5s...");
         Bukkit.getScheduler().runTaskLater(plugin, this::startNextWave, 100L);
@@ -441,7 +488,9 @@ public class DungeonSession {
                 p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
                 // Give reward (split among players)
                 double share = totalReward / players.size();
-                p.sendMessage("§a§l★ DUNGEON COMPLETA! §e+" + formatMoney(share));
+                p.sendMessage(Component.text("★ ", NamedTextColor.GOLD)
+                        .append(Component.text("DUNGEON COMPLETA! ", NamedTextColor.GREEN))
+                        .append(Component.text("+" + formatMoney(share), NamedTextColor.YELLOW)));
             }
         }
     }
@@ -461,7 +510,10 @@ public class DungeonSession {
                 p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
                 double share = partial / players.size();
                 if (share > 0) {
-                    p.sendMessage("§c§lDungeon falhou! §eRecompensa parcial: " + formatMoney(share));
+                    p.sendMessage(Component.text("☠ ", NamedTextColor.RED)
+                            .append(Component.text("Dungeon falhou! ", NamedTextColor.RED))
+                            .append(Component.text("Recompensa parcial: " + formatMoney(share),
+                                    NamedTextColor.YELLOW)));
                 }
             }
         }
@@ -509,10 +561,8 @@ public class DungeonSession {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
                 p.showTitle(Title.title(
-                        net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
-                                .deserialize(title),
-                        net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
-                                .deserialize(subtitle)));
+                        LegacyComponentSerializer.legacySection().deserialize(title),
+                        LegacyComponentSerializer.legacySection().deserialize(subtitle)));
             }
         }
     }

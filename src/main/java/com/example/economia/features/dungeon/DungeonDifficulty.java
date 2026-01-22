@@ -1,11 +1,16 @@
 package com.example.economia.features.dungeon;
 
 public enum DungeonDifficulty {
-    NIVEL_1("Cripta dos Mortos", 2000, 20000, 5, "§a"),
-    NIVEL_2("Caverna Sombria", 10000, 100000, 6, "§e"),
-    NIVEL_3("Fortaleza das Trevas", 30000, 300000, 8, "§6"),
-    NIVEL_4("Abismo Infernal", 100000, 1000000, 10, "§c"),
-    NIVEL_5("Portal do Caos", 300000, 3000000, 12, "§5");
+    NIVEL_1("Cripta dos Mortos", 500, 5000, 5, "§a"),
+    NIVEL_2("Caverna Sombria", 2000, 20000, 6, "§e"),
+    NIVEL_3("Fortaleza das Trevas", 5000, 50000, 8, "§6"),
+    NIVEL_4("Abismo Infernal", 15000, 150000, 10, "§c"),
+    NIVEL_5("Portal do Caos", 40000, 400000, 12, "§5"),
+    NIVEL_6("Reino do Vazio", 100000, 1000000, 14, "§b"),
+    NIVEL_7("Dimensão Esquecida", 250000, 2500000, 16, "§d"),
+    NIVEL_8("Pesadelo Ancestral", 500000, 5000000, 18, "§1"),
+    NIVEL_9("Domínio do Soberano", 1000000, 10000000, 20, "§0"),
+    NIVEL_10("Fim da Existência", 2000000, 20000000, 25, "§k§l");
 
     private final String name;
     private final double entryCost;
@@ -52,6 +57,11 @@ public enum DungeonDifficulty {
             case NIVEL_3 -> 2000;
             case NIVEL_4 -> 4000;
             case NIVEL_5 -> 8000;
+            case NIVEL_6 -> 15000;
+            case NIVEL_7 -> 25000;
+            case NIVEL_8 -> 50000;
+            case NIVEL_9 -> 100000;
+            case NIVEL_10 -> 250000;
         };
     }
 

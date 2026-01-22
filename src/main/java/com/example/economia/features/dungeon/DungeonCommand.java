@@ -96,7 +96,7 @@ public class DungeonCommand implements CommandExecutor {
         player.sendMessage("§e/dungeon sair §8- §7Sair da dungeon atual");
         player.sendMessage("§e/dungeon lista §8- §7Ver dungeons ativas");
         player.sendMessage("");
-        player.sendMessage("§a⚡ §7Dungeons aparecem a cada §e15 minutos§7!");
+        player.sendMessage("§a⚡ §7Dungeons aparecem a cada §e5 minutos§7!");
         player.sendMessage("§8§m                                    ");
     }
 
@@ -135,7 +135,7 @@ public class DungeonCommand implements CommandExecutor {
         var sessions = dungeonService.getActiveSessions();
         if (sessions.isEmpty() && natural == null) {
             player.sendMessage("§7Nenhuma dungeon ativa no momento.");
-            player.sendMessage("§7Aguarde 15 minutos para a próxima spawn!");
+            player.sendMessage("§7Aguarde 5 minutos para a próxima spawn!");
         } else {
             for (var entry : sessions.entrySet()) {
                 DungeonSession session = entry.getValue();
@@ -162,6 +162,11 @@ public class DungeonCommand implements CommandExecutor {
             case "nivel3", "nivel_3", "3", "fortaleza" -> DungeonDifficulty.NIVEL_3;
             case "nivel4", "nivel_4", "4", "abismo" -> DungeonDifficulty.NIVEL_4;
             case "nivel5", "nivel_5", "5", "portal", "caos" -> DungeonDifficulty.NIVEL_5;
+            case "nivel6", "nivel_6", "6", "vazio" -> DungeonDifficulty.NIVEL_6;
+            case "nivel7", "nivel_7", "7", "esquecida" -> DungeonDifficulty.NIVEL_7;
+            case "nivel8", "nivel_8", "8", "pesadelo" -> DungeonDifficulty.NIVEL_8;
+            case "nivel9", "nivel_9", "9", "soberano" -> DungeonDifficulty.NIVEL_9;
+            case "nivel10", "nivel_10", "10", "fim" -> DungeonDifficulty.NIVEL_10;
             default -> null;
         };
     }

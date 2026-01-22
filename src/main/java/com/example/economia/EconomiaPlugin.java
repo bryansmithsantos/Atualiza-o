@@ -6,7 +6,6 @@ import com.example.economia.features.auth.AuthInputListener;
 import com.example.economia.features.auth.AuthListener;
 import com.example.economia.features.auth.AuthService;
 import com.example.economia.features.bank.BankService;
-import com.example.economia.features.bedrock.BedrockSupport;
 import com.example.economia.features.commands.AuthCommand;
 import com.example.economia.features.commands.FinesCommand;
 import com.example.economia.features.commands.MenuCommand;
@@ -46,7 +45,6 @@ import com.example.economia.features.gravestone.GravestoneListener;
 public final class EconomiaPlugin extends JavaPlugin {
 
     private ScoreboardService scoreboardService;
-    private BedrockSupport bedrockSupport;
     private EconomyService economyService;
     private AuthService authService;
     private JobsService jobsService;
@@ -67,10 +65,8 @@ public final class EconomiaPlugin extends JavaPlugin {
     private ClanService clanService;
     private HomeService homeService;
 
-    @Override
     public void onEnable() {
         saveDefaultConfig();
-        bedrockSupport = new BedrockSupport(this);
         economyService = new EconomyService(this);
         economyService.load();
         authService = new AuthService(this);
@@ -109,9 +105,10 @@ public final class EconomiaPlugin extends JavaPlugin {
         shopService = new ShopService(this);
         shopService.load();
 
-        scoreboardService = new ScoreboardService(this, bedrockSupport, economyService);
+        scoreboardService = new ScoreboardService(this, economyService, clanService);
         scoreboardService.start();
-        getServer().getPluginManager().registerEvents(scoreboardService.getPlayerListener(), this);
+        getServer().getPluginManager().registerEvents(
+                new com.example.economia.features.scoreboard.PlayerJoinListener(scoreboardService), this);
         getServer().getPluginManager().registerEvents(new EconomyListener(economyService), this);
         getServer().getPluginManager().registerEvents(new AuthListener(authService), this);
         getServer().getPluginManager()

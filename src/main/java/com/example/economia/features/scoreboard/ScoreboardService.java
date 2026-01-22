@@ -1,192 +1,145 @@
 package com.example.economia.features.scoreboard;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
-import com.example.economia.features.bedrock.BedrockSupport;
+import com.example.economia.features.clans.Clan;
+import com.example.economia.features.clans.ClanService;
 import com.example.economia.features.economy.EconomyService;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-public final class ScoreboardService {
-
-    private static final String OBJECTIVE_ID = "economia_stats";
-
-    // Colors (Hex)
-    private static final TextColor PRIMARY = TextColor.fromHexString("#FF5555");
-    private static final TextColor SECONDARY = TextColor.fromHexString("#FFAA00");
-    private static final TextColor TEXT = TextColor.fromHexString("#E0E0E0");
-    private static final TextColor VALUE = TextColor.fromHexString("#FFFFFF");
-    private static final TextColor ACCENT = TextColor.fromHexString("#55FFFF");
-    private static final TextColor DARK = TextColor.fromHexString("#555555");
+public class ScoreboardService {
 
     private final Plugin plugin;
-    private final BedrockSupport bedrockSupport;
     private final EconomyService economyService;
-    private final PlayerJoinListener playerListener;
-    private final Map<UUID, Scoreboard> scoreboards = new HashMap<>();
-    private int taskId = -1;
+    private final ClanService clanService;
+    private final Map<UUID, Scoreboard> playerScoreboards = new HashMap<>();
+    private int taskID = -1;
 
-    public ScoreboardService(Plugin plugin, BedrockSupport bedrockSupport, EconomyService economyService) {
+    public ScoreboardService(Plugin plugin, EconomyService economyService, ClanService clanService) {
         this.plugin = plugin;
-        this.bedrockSupport = bedrockSupport;
         this.economyService = economyService;
-        this.playerListener = new PlayerJoinListener(this);
-    }
-
-    public PlayerJoinListener getPlayerListener() {
-        return playerListener;
+        this.clanService = clanService;
     }
 
     public void start() {
-        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
-                plugin, this::updateAll, 20L, 40L);
-        Bukkit.getOnlinePlayers().forEach(this::applyScoreboard);
+        if (taskID != -1)
+            return;
+
+        taskID = new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    updateScoreboard(player);
+                }
+            }
+        }.runTaskTimer(plugin, 20L, 20L).getTaskId();
     }
 
     public void stop() {
-        if (taskId != -1) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (taskID != -1) {
+            Bukkit.getScheduler().cancelTask(taskID);
+            taskID = -1;
         }
-        scoreboards.clear();
     }
 
-    public void applyScoreboard(Player player) {
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        if (manager == null)
-            return;
+    public void setupScoreboard(Player player) {
+        // Reuse current scoreboard if it exists to preserve teams (Clans/Glow)
+        Scoreboard board = player.getScoreboard();
+        if (board == Bukkit.getScoreboardManager().getMainScoreboard()) {
+            board = Bukkit.getScoreboardManager().getNewScoreboard();
+            player.setScoreboard(board);
+        }
 
-        Scoreboard board = manager.getNewScoreboard();
-        Component title = Component.text("⚡ BLINDED ⚡", PRIMARY).decorate(TextDecoration.BOLD);
-        Objective objective = board.registerNewObjective(OBJECTIVE_ID, Criteria.DUMMY, title);
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        playerScoreboards.put(player.getUniqueId(), board);
 
-        // Lines
-        String line0 = entry("", DARK, "§m------------------");
-        String line1 = entry("🌐 ", SECONDARY, "Info:");
-        String line2 = entry("  ▪ Online: ", TEXT, "");
-        String line3 = entry("  ▪ Ping: ", TEXT, "");
-        String line4 = entry("", DARK, " ");
-        String line5 = entry("👤 ", SECONDARY, "Perfil:");
-        String line6 = entry("  ▪ Rank: ", TEXT, "");
-        String line7 = entry("  ▪ Saldo: ", TEXT, "");
-        String line8 = entry("  ▪ Plataforma: ", ACCENT, "");
-        String line9 = entry("📍 ", SECONDARY, "Local:");
-        String line10 = entry("  ▪ Coords: ", TEXT, "");
-        String line11 = entry("", DARK, "§m------------------");
+        Objective obj = board.getObjective("blinded");
+        if (obj == null) {
+            obj = board.registerNewObjective("blinded", Criteria.DUMMY,
+                    LegacyComponentSerializer.legacySection().deserialize("§6§l⚡ BLINDED"));
+            obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+        }
 
-        setScore(objective, line11, 11);
-        setScore(objective, line9, 10);
-        setScore(objective, line10, 9);
-        setScore(objective, line5, 8);
-        setScore(objective, line6, 7);
-        setScore(objective, line7, 6);
-        setScore(objective, line8, 5);
-        setScore(objective, line4, 4);
-        setScore(objective, line1, 3);
-        setScore(objective, line2, 2);
-        setScore(objective, line3, 1);
-        setScore(objective, line0, 0);
-
-        createTeam(board, "rank", line6, getRanking(player));
-        createTeam(board, "money", line7, formatMoney(player));
-        createTeam(board, "online", line2, " " + Bukkit.getOnlinePlayers().size());
-        createTeam(board, "ping", line3, " " + player.getPing() + "ms");
-        createTeam(board, "platform", line8, formatPlatform(player));
-        createTeam(board, "coords", line10, formatCoords(player));
-
-        player.setScoreboard(board);
-        scoreboards.put(player.getUniqueId(), board);
-    }
-
-    private void setScore(Objective obj, String entry, int score) {
-        obj.getScore(entry).setScore(score);
-    }
-
-    private void createTeam(Scoreboard board, String name, String entry, String suffix) {
-        Team team = board.registerNewTeam(name);
-        team.addEntry(entry);
-        team.suffix(Component.text(suffix, VALUE));
+        updateScoreboard(player);
     }
 
     public void removeScoreboard(Player player) {
-        scoreboards.remove(player.getUniqueId());
+        playerScoreboards.remove(player.getUniqueId());
     }
 
-    public void updateAll() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            Scoreboard board = scoreboards.get(player.getUniqueId());
-            if (board == null) {
-                applyScoreboard(player);
-                continue;
-            }
-            updateTeam(board, "rank", getRanking(player));
-            updateTeam(board, "money", formatMoney(player));
-            updateTeam(board, "online", " " + Bukkit.getOnlinePlayers().size());
-            updateTeam(board, "ping", " " + player.getPing() + "ms");
-            updateTeam(board, "platform", formatPlatform(player));
-            updateTeam(board, "coords", formatCoords(player));
+    private void updateScoreboard(Player player) {
+        Scoreboard board = player.getScoreboard();
+        Objective obj = board.getObjective("blinded");
+
+        if (obj == null) {
+            setupScoreboard(player);
+            return;
         }
-    }
 
-    private void updateTeam(Scoreboard board, String name, String suffix) {
-        Team team = board.getTeam(name);
-        if (team != null) {
-            team.suffix(Component.text(suffix, VALUE));
-        }
-    }
+        double balance = economyService.getBalance(player.getUniqueId());
+        Clan clan = clanService.getClan(player.getUniqueId());
+        String clanTag = (clan != null) ? "§7[" + clan.getTag() + "]" : "§7Nenhum";
 
-    private String formatMoney(Player player) {
-        if (economyService == null)
-            return " $0.00";
-        return " " + economyService.formatBalance(player.getUniqueId());
-    }
-
-    private String formatPlatform(Player player) {
-        if (bedrockSupport == null || !bedrockSupport.isAvailable())
-            return " Java";
-        return bedrockSupport.isBedrock(player) ? " Bedrock" : " Java";
-    }
-
-    private String formatCoords(Player player) {
         int x = player.getLocation().getBlockX();
         int y = player.getLocation().getBlockY();
         int z = player.getLocation().getBlockZ();
-        return " " + x + ", " + y + ", " + z;
+
+        // Updated design: Clean, informative, uses components
+        updateLine(board, "line1", 12, "§1", Component.text("§8§m----------------"));
+        updateLine(board, "line2", 11, "§2",
+                Component.text("👤 ", NamedTextColor.WHITE).append(Component.text("Perfil:", NamedTextColor.GOLD)));
+        updateLine(board, "line3", 10, "§3", Component.text("  Nome: ", NamedTextColor.GRAY)
+                .append(Component.text(player.getName(), NamedTextColor.WHITE)));
+        updateLine(board, "line4", 9, "§4", Component.text("  Clan: ", NamedTextColor.GRAY)
+                .append(LegacyComponentSerializer.legacySection().deserialize(clanTag)));
+        updateLine(board, "line5", 8, "§5", Component.empty());
+        updateLine(board, "line6", 7, "§6",
+                Component.text("💰 ", NamedTextColor.WHITE).append(Component.text("Economia:", NamedTextColor.GOLD)));
+        updateLine(board, "line7", 6, "§7", Component.text("  Saldo: ", NamedTextColor.GRAY)
+                .append(Component.text(formatMoney(balance), NamedTextColor.GREEN)));
+        updateLine(board, "line8", 5, "§8", Component.empty());
+        updateLine(board, "line9", 4, "§9",
+                Component.text("📍 ", NamedTextColor.WHITE).append(Component.text("Local:", NamedTextColor.GOLD)));
+        updateLine(board, "line10", 3, "§a", Component.text("  " + x + " " + y + " " + z, NamedTextColor.WHITE));
+        updateLine(board, "line11", 2, "§b", Component.empty());
+        updateLine(board, "line12", 1, "§c", Component.text("      blinded.com", NamedTextColor.YELLOW));
     }
 
-    private String getRanking(Player player) {
-        if (economyService == null)
-            return " #?";
-        List<Map.Entry<UUID, Double>> leaderboard = economyService.getLeaderboard(100);
-        int position = 1;
-        for (Map.Entry<UUID, Double> entry : leaderboard) {
-            if (entry.getKey().equals(player.getUniqueId())) {
-                return " #" + position;
-            }
-            position++;
+    private void updateLine(Scoreboard board, String teamName, int score, String entry, Component text) {
+        Team team = board.getTeam(teamName);
+        if (team == null) {
+            team = board.registerNewTeam(teamName);
+            team.addEntry(entry);
         }
-        return " >100";
+
+        // Use Adventure Component for prefix
+        team.prefix(text);
+
+        Objective obj = board.getObjective("blinded");
+        if (obj != null) {
+            obj.getScore(entry).setScore(score);
+        }
     }
 
-    private String entry(String prefix, TextColor color, String label) {
-        return LegacyComponentSerializer.legacySection().serialize(
-                Component.text(prefix, color).append(Component.text(label, color)));
+    private String formatMoney(double amount) {
+        if (amount >= 1_000_000)
+            return String.format("$%.1fM", amount / 1_000_000);
+        if (amount >= 1_000)
+            return String.format("$%.1fK", amount / 1_000);
+        return String.format("$%.0f", amount);
     }
 }
