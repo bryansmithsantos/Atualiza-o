@@ -26,18 +26,14 @@ public class DungeonListener implements Listener {
         DungeonSession session = dungeonService.getSession(player);
 
         if (session != null && session.isActive()) {
-            // Cancel drops in dungeon
             event.getDrops().clear();
             event.setDroppedExp(0);
-
-            // Save for respawn
             dungeonService.handlePlayerDeath(player);
         }
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
-        // Delay to let normal respawn happen first
         dungeonService.handlePlayerRespawn(event.getPlayer());
     }
 
@@ -45,25 +41,20 @@ public class DungeonListener implements Listener {
     public void onMobDeath(EntityDeathEvent event) {
         Entity entity = event.getEntity();
 
-        // Check if in any dungeon arena
         for (var entry : dungeonService.getActiveSessions().entrySet()) {
             DungeonSession session = entry.getValue();
             if (session.isActive() && session.getArenaCenter() != null) {
                 try {
                     if (entity.getLocation().distance(session.getArenaCenter()) < 60) {
-                        // It's a dungeon mob
                         if (entity instanceof IronGolem && entity.equals(session.getBoss())) {
-                            // Boss killed
+                            // Boss killed: triggers victory and payout internally in Session
                             session.onBossKill();
-                            // Give extra reward for boss
-                            dungeonService.giveRewards(session, session.getDifficulty().getMaxReward() * 0.5);
                         } else if (entity instanceof LivingEntity && !(entity instanceof Player)) {
                             session.onMobKill();
                         }
                         break;
                     }
                 } catch (Exception e) {
-                    // Different worlds, skip
                 }
             }
         }
@@ -75,9 +66,7 @@ public class DungeonListener implements Listener {
         DungeonSession session = dungeonService.getSession(player);
 
         if (session != null) {
-            // Player left during dungeon
             session.removePlayer(player);
-
             if (session.getPlayers().isEmpty()) {
                 session.defeat();
                 dungeonService.endSession(session);

@@ -29,6 +29,7 @@ import net.kyori.adventure.title.Title;
 public class DungeonSession {
 
     private final Plugin plugin;
+    private final DungeonService dungeonService;
     private final DungeonDifficulty difficulty;
     private final Set<UUID> players = new HashSet<>();
     private final UUID owner;
@@ -42,8 +43,9 @@ public class DungeonSession {
     private double totalReward = 0;
     private final List<Location> arenaBlocks = new ArrayList<>();
 
-    public DungeonSession(Plugin plugin, Player owner, DungeonDifficulty difficulty) {
+    public DungeonSession(Plugin plugin, DungeonService dungeonService, Player owner, DungeonDifficulty difficulty) {
         this.plugin = plugin;
+        this.dungeonService = dungeonService;
         this.owner = owner != null ? owner.getUniqueId() : null;
         this.difficulty = difficulty;
         if (owner != null) {
@@ -79,12 +81,10 @@ public class DungeonSession {
         return active;
     }
 
-    // Generate arena without starting (for natural spawns)
     public void generateArenaOnly() {
         generateArena();
     }
 
-    // Cleanup arena without rewards (for timeout)
     public void cleanup() {
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
@@ -104,7 +104,6 @@ public class DungeonSession {
         generateArena();
         teleportPlayers();
 
-        // Countdown
         new BukkitRunnable() {
             int countdown = 5;
 
@@ -126,22 +125,18 @@ public class DungeonSession {
 
     private void generateArena() {
         World world = Bukkit.getWorlds().get(0);
-        // Arena at Y=300 (sky)
         int baseX = (int) (Math.random() * 10000) - 5000;
         int baseZ = (int) (Math.random() * 10000) - 5000;
         int baseY = 300;
 
         arenaCenter = new Location(world, baseX + 25, baseY + 1, baseZ + 25);
 
-        // Generate 50x50 arena
         for (int x = 0; x < 50; x++) {
             for (int z = 0; z < 50; z++) {
-                // Floor
                 Block floor = world.getBlockAt(baseX + x, baseY, baseZ + z);
                 floor.setType(Material.DEEPSLATE_BRICKS);
                 arenaBlocks.add(floor.getLocation());
 
-                // Walls (edges)
                 if (x == 0 || x == 49 || z == 0 || z == 49) {
                     for (int y = 1; y <= 5; y++) {
                         Block wall = world.getBlockAt(baseX + x, baseY + y, baseZ + z);
@@ -152,7 +147,6 @@ public class DungeonSession {
             }
         }
 
-        // Torches for lighting
         for (int x = 5; x < 50; x += 10) {
             for (int z = 5; z < 50; z += 10) {
                 Block torch = world.getBlockAt(baseX + x, baseY + 1, baseZ + z);
@@ -180,26 +174,22 @@ public class DungeonSession {
         currentWave++;
 
         if (currentWave > difficulty.getWaves()) {
-            // Victory!
             victory();
             return;
         }
 
-        // Check if boss wave
         if (currentWave == difficulty.getWaves()) {
             bossPhase = true;
             spawnBoss();
             return;
         }
 
-        // Normal wave
         int mobCount = difficulty.getMobsPerWave(currentWave);
         mobsRemaining = mobCount;
 
         broadcastTitle("§6Onda " + currentWave, "§7" + mobCount + " inimigos!");
         broadcastMessage("§e⚔ Onda " + currentWave + "/" + difficulty.getWaves() + " - " + mobCount + " mobs!");
 
-        // Spawn mobs
         spawnMobs(mobCount);
     }
 
@@ -221,10 +211,8 @@ public class DungeonSession {
                     }
                 }
 
-                // Prevent burning with helmet (Button)
                 if (living.getEquipment() != null) {
                     living.getEquipment().setHelmet(new org.bukkit.inventory.ItemStack(Material.STONE_BUTTON));
-                    // Armor scaling for high levels
                     if (difficulty.ordinal() >= 5) {
                         living.getEquipment()
                                 .setChestplate(new org.bukkit.inventory.ItemStack(Material.IRON_CHESTPLATE));
@@ -265,7 +253,6 @@ public class DungeonSession {
         broadcastMessage("§4☠ " + getBossName() + " §capareceu!");
         playSound(org.bukkit.Sound.ENTITY_WITHER_SPAWN, 1f);
 
-        // Boss message
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             broadcastMessage("§c§l" + getBossName() + "§c: §7\"Vocês ousam invadir meu domínio?!\"");
         }, 40L);
@@ -276,7 +263,6 @@ public class DungeonSession {
         boss.setCustomNameVisible(true);
         boss.setRemoveWhenFarAway(false);
 
-        // Set HP using Attribute
         org.bukkit.attribute.AttributeInstance maxHealthAttr = boss
                 .getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH);
         if (maxHealthAttr != null) {
@@ -284,13 +270,11 @@ public class DungeonSession {
         }
         boss.setHealth(difficulty.getBossHP());
 
-        // Make hostile
         Player target = getRandomPlayer();
         if (target != null) {
             boss.setTarget(target);
         }
 
-        // Start boss powers
         startBossPowers();
     }
 
@@ -322,12 +306,10 @@ public class DungeonSession {
 
                 tick++;
 
-                // Different powers based on difficulty and timing
-                if (tick % 200 == 0) { // Every 10 seconds
+                if (tick % 200 == 0) {
                     useBossPower();
                 }
 
-                // Boss health messages
                 org.bukkit.attribute.AttributeInstance maxHp = boss
                         .getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH);
                 double maxHealth = maxHp != null ? maxHp.getValue() : 100;
@@ -337,7 +319,6 @@ public class DungeonSession {
                 }
                 if (healthPercent < 0.25 && tick == 400) {
                     broadcastMessage("§c§l" + getBossName() + "§c: §7\"VOCÊS VÃO PAGAR!\"");
-                    // Enrage - extra power
                     useBossPower();
                     useBossPower();
                 }
@@ -418,7 +399,7 @@ public class DungeonSession {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
                 p.getWorld().strikeLightningEffect(p.getLocation());
-                p.damage(4.0); // 2 hearts
+                p.damage(4.0);
             }
         }
     }
@@ -451,7 +432,7 @@ public class DungeonSession {
         }
         broadcastMessage("§a§l" + getBossName() + " §afoi derrotado!");
         broadcastMessage("§c§l" + getBossName() + "§c: §7\"Isso... não é... possível...\"");
-        totalReward += difficulty.getMaxReward() * 0.5; // Boss bonus
+        totalReward += difficulty.getMaxReward() * 0.5;
         victory();
     }
 
@@ -460,7 +441,6 @@ public class DungeonSession {
         broadcastMessage("§a✓ Onda " + currentWave + " completa! §e+" + formatMoney(difficulty.getRewardPerWave()));
         playSound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.5f);
 
-        // Global announcement for progress
         if (currentWave > 1) {
             String ownerName = Bukkit.getPlayer(owner) != null ? Bukkit.getPlayer(owner).getName() : "Equipe";
             Bukkit.getServer().sendMessage(Component.text("⚔ ", NamedTextColor.GOLD)
@@ -469,7 +449,6 @@ public class DungeonSession {
                             NamedTextColor.GRAY)));
         }
 
-        // 5 second break
         broadcastTitle("§a§lOnda Completa!", "§7Próxima em 5s...");
         Bukkit.getScheduler().runTaskLater(plugin, this::startNextWave, 100L);
     }
@@ -481,25 +460,25 @@ public class DungeonSession {
         broadcastTitle("§a§lVITÓRIA!", "§e+" + formatMoney(totalReward));
         playSound(org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f);
 
-        // Teleport back and give rewards
         for (UUID uuid : players) {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null) {
                 p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                // Give reward (split among players)
                 double share = totalReward / players.size();
                 p.sendMessage(Component.text("★ ", NamedTextColor.GOLD)
                         .append(Component.text("DUNGEON COMPLETA! ", NamedTextColor.GREEN))
                         .append(Component.text("+" + formatMoney(share), NamedTextColor.YELLOW)));
             }
         }
+
+        // PAYOUT
+        dungeonService.giveRewards(this, totalReward);
     }
 
     public void defeat() {
         active = false;
         cleanupArena();
 
-        // Partial reward
         double partial = totalReward * 0.5;
 
         broadcastTitle("§c§lDERROTA!", "§7Você morreu...");
@@ -517,10 +496,16 @@ public class DungeonSession {
                 }
             }
         }
+
+        // PAYOUT partial
+        if (partial > 0) {
+            dungeonService.giveRewards(this, partial);
+        } else {
+            dungeonService.endSession(this);
+        }
     }
 
     private void cleanupArena() {
-        // Remove all mobs in arena
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
                 if (entity.getLocation().distance(arenaCenter) < 60 && !(entity instanceof Player)) {
@@ -529,7 +514,6 @@ public class DungeonSession {
             }
         }
 
-        // Remove arena blocks
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Location loc : arenaBlocks) {
                 loc.getBlock().setType(Material.AIR);
