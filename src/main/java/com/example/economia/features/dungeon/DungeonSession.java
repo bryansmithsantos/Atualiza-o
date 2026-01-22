@@ -40,6 +40,7 @@ public class DungeonSession {
     private boolean bossPhase = false;
     private IronGolem boss;
     private int bossTaskId = -1;
+    private int safetyTaskId = -1;
     private double totalReward = 0;
     private final List<Location> arenaBlocks = new ArrayList<>();
 
@@ -86,6 +87,10 @@ public class DungeonSession {
     }
 
     public void cleanup() {
+        if (safetyTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(safetyTaskId);
+            safetyTaskId = -1;
+        }
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
                 if (entity.getLocation().distance(arenaCenter) < 60 && !(entity instanceof Player)) {
@@ -103,6 +108,7 @@ public class DungeonSession {
         active = true;
         generateArena();
         teleportPlayers();
+        startSafetyCheck();
 
         new BukkitRunnable() {
             int countdown = 5;
@@ -133,10 +139,17 @@ public class DungeonSession {
 
         for (int x = 0; x < 50; x++) {
             for (int z = 0; z < 50; z++) {
+                // Floor
                 Block floor = world.getBlockAt(baseX + x, baseY, baseZ + z);
                 floor.setType(Material.DEEPSLATE_BRICKS);
                 arenaBlocks.add(floor.getLocation());
 
+                // Ceiling
+                Block ceiling = world.getBlockAt(baseX + x, baseY + 6, baseZ + z);
+                ceiling.setType(Material.TINTED_GLASS);
+                arenaBlocks.add(ceiling.getLocation());
+
+                // Walls
                 if (x == 0 || x == 49 || z == 0 || z == 49) {
                     for (int y = 1; y <= 5; y++) {
                         Block wall = world.getBlockAt(baseX + x, baseY + y, baseZ + z);
@@ -147,6 +160,7 @@ public class DungeonSession {
             }
         }
 
+        // Lighting
         for (int x = 5; x < 50; x += 10) {
             for (int z = 5; z < 50; z += 10) {
                 Block torch = world.getBlockAt(baseX + x, baseY + 1, baseZ + z);
@@ -154,6 +168,34 @@ public class DungeonSession {
                 arenaBlocks.add(torch.getLocation());
             }
         }
+    }
+
+    private void startSafetyCheck() {
+        safetyTaskId = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!active || arenaCenter == null) {
+                    cancel();
+                    return;
+                }
+
+                if (mobsRemaining > 0 && !bossPhase) {
+                    int actualMobs = 0;
+                    for (Entity entity : arenaCenter.getWorld().getNearbyEntities(arenaCenter, 50, 20, 50)) {
+                        if (entity instanceof LivingEntity && !(entity instanceof Player)) {
+                            actualMobs++;
+                        }
+                    }
+
+                    if (actualMobs == 0) {
+                        // All mobs disappeared but wave didn't finish
+                        broadcastMessage("§8[Blinded] §7Anti-Bug: Detectado desaparecimento de mobs. Pulando onda...");
+                        mobsRemaining = 0;
+                        waveComplete();
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 100L, 100L).getTaskId(); // Every 5 seconds
     }
 
     private void teleportPlayers() {
@@ -420,8 +462,10 @@ public class DungeonSession {
     }
 
     public void onMobKill() {
+        if (!active || bossPhase)
+            return;
         mobsRemaining--;
-        if (mobsRemaining <= 0 && !bossPhase) {
+        if (mobsRemaining <= 0) {
             waveComplete();
         }
     }
@@ -506,6 +550,10 @@ public class DungeonSession {
     }
 
     private void cleanupArena() {
+        if (safetyTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(safetyTaskId);
+            safetyTaskId = -1;
+        }
         if (arenaCenter != null) {
             for (Entity entity : arenaCenter.getWorld().getEntities()) {
                 if (entity.getLocation().distance(arenaCenter) < 60 && !(entity instanceof Player)) {
