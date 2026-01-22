@@ -483,45 +483,58 @@ public final class GuiListener implements Listener {
             return;
         }
 
-        // Mission item (dyes)
-        if (type == Material.LIME_DYE || type == Material.YELLOW_DYE || type == Material.GRAY_DYE) {
-            // Get mission by matching title from display name (without color codes)
-            if (item.getItemMeta() == null || item.getItemMeta().displayName() == null)
-                return;
+        // Ignore decorative items
+        if (type == Material.CYAN_STAINED_GLASS_PANE || type == Material.NETHER_STAR) {
+            return;
+        }
 
-            String displayName = PlainTextComponentSerializer.plainText().serialize(item.getItemMeta().displayName());
+        // Extract mission ID from lore
+        if (item.getItemMeta() == null || item.getItemMeta().lore() == null) {
+            return;
+        }
 
-            // Remove color code prefixes that might remain
-            displayName = displayName.replaceAll("^[§&][a-fA-F0-9klmnor]", "").trim();
-
-            for (Mission mission : missionsService.getMissions()) {
-                if (displayName.contains(mission.title()) || mission.title().contains(displayName) ||
-                        displayName.equalsIgnoreCase(mission.title())) {
-
-                    // Check if already claimed
-                    if (type == Material.LIME_DYE) {
-                        player.sendMessage("§7Esta missão já foi coletada!");
-                        return;
-                    }
-
-                    // Try to claim
-                    if (!missionsService.claim(player.getUniqueId(), mission)) {
-                        player.sendMessage("§cMissão ainda não completa!");
-                        return;
-                    }
-
-                    economyService.addBalance(player.getUniqueId(), mission.reward());
-                    logService.add(player.getUniqueId(),
-                            "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
-                    player.sendMessage("§a✓ Missão concluída! +" + economyService.getCurrencySymbol() +
-                            String.format("%.0f", mission.reward()));
-                    player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.5f);
-                    MissionsGui.open(player, economyService, missionsService,
-                            MissionsGui.getPlayerPage(player.getUniqueId()));
-                    return;
-                }
+        String missionId = null;
+        for (net.kyori.adventure.text.Component line : item.getItemMeta().lore()) {
+            String text = PlainTextComponentSerializer.plainText().serialize(line);
+            if (text.startsWith("ID: ")) {
+                missionId = text.substring(4);
+                break;
             }
         }
+
+        if (missionId == null) {
+            return;
+        }
+
+        // Find mission by ID
+        Mission mission = null;
+        for (Mission m : missionsService.getMissions()) {
+            if (m.id().equals(missionId)) {
+                mission = m;
+                break;
+            }
+        }
+
+        if (mission == null) {
+            return;
+        }
+
+        // Try to claim
+        if (!missionsService.claim(player.getUniqueId(), mission)) {
+            player.sendMessage("§cMissão incompleta ou já reivindicada.");
+            return;
+        }
+
+        economyService.addBalance(player.getUniqueId(), mission.reward());
+        logService.add(player.getUniqueId(),
+                "Missão concluída +" + economyService.getCurrencySymbol() + mission.reward());
+        player.sendMessage(
+                "§aMissão concluída! +" + economyService.getCurrencySymbol() + String.format("%.0f", mission.reward()));
+        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.5f);
+
+        // Refresh GUI
+        int currentPage = MissionsGui.getPlayerPage(player.getUniqueId());
+        MissionsGui.open(player, economyService, missionsService, currentPage);
     }
 
     private void handleMarketClick(Player player, ItemStack item) {

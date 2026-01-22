@@ -138,6 +138,12 @@ public final class EconomiaPlugin extends JavaPlugin {
         TagService tagService = new TagService(this);
         tagService.load();
         clanListener.setTagService(tagService);
+
+        // Auto Announcements
+        com.example.economia.features.announcements.AnnouncementService announcementService = new com.example.economia.features.announcements.AnnouncementService(
+                this);
+        announcementService.start();
+
         getServer().getPluginManager()
                 .registerEvents(new com.example.economia.features.gui.ServerShopGui(economyService), this);
         if (getCommand("money") != null) {
