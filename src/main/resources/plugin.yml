@@ -78,6 +78,10 @@ commands:
     description: Define tag de um jogador (admin)
     usage: /tag <player> <tag>
     permission: blinded.admin
+  dungeon:
+    description: Sistema de dungeons
+    usage: /dungeon <entrar|sair|lista>
+    aliases: [dg, masmorra]
 permissions:
   blinded.admin:
     description: Permite administrar o saldo dos jogadores.

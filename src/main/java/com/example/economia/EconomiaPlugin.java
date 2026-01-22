@@ -138,6 +138,7 @@ public final class EconomiaPlugin extends JavaPlugin {
         TagService tagService = new TagService(this);
         tagService.load();
         clanListener.setTagService(tagService);
+        clanListener.setPlugin(this); // For glow updates
 
         // Auto Announcements
         com.example.economia.features.announcements.AnnouncementService announcementService = new com.example.economia.features.announcements.AnnouncementService(
@@ -218,6 +219,18 @@ public final class EconomiaPlugin extends JavaPlugin {
         if (getCommand("tag") != null) {
             getCommand("tag").setExecutor(new TagCommand(tagService));
         }
+
+        // Dungeon System
+        com.example.economia.features.dungeon.DungeonService dungeonService = new com.example.economia.features.dungeon.DungeonService(
+                this, economyService);
+        dungeonService.setClanService(clanService);
+        dungeonService.startNaturalSpawnCycle();
+        getServer().getPluginManager().registerEvents(
+                new com.example.economia.features.dungeon.DungeonListener(dungeonService), this);
+        if (getCommand("dungeon") != null) {
+            getCommand("dungeon").setExecutor(new com.example.economia.features.dungeon.DungeonCommand(dungeonService));
+        }
+
         getLogger().info("EconomiaPlugin habilitado.");
     }
 
