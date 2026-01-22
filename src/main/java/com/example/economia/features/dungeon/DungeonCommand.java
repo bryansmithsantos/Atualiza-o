@@ -30,9 +30,9 @@ public class DungeonCommand implements CommandExecutor {
         String sub = args[0].toLowerCase();
 
         if (sub.equals("entrar")) {
-            // Check if natural dungeon is available
+            // Check if natural dungeon is available AND no level was specified
             DungeonSession natural = dungeonService.getNaturalDungeon();
-            if (natural != null) {
+            if (natural != null && args.length == 1) {
                 dungeonService.joinNaturalDungeon(player);
                 return true;
             }
